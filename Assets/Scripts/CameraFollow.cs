@@ -82,6 +82,7 @@ public class CameraFollow : MonoBehaviour
         float left, right;
         float top, bottom;
         float maxMouseRangex, maxMouseRangey;
+        bool onLeft, onRight;
 
 
         public FocusArea(Bounds targetBounds, Vector2 size)
@@ -93,6 +94,9 @@ public class CameraFollow : MonoBehaviour
 
             maxMouseRangex = size.x;
             maxMouseRangey = size.y;
+
+            onLeft = false;
+            onRight = false;
 
             velocity = Vector2.zero;
             centre = new Vector2((left + right) / 2, (top + bottom) / 2);
@@ -111,33 +115,50 @@ public class CameraFollow : MonoBehaviour
             {
                 mouseX = Screen.width;
             }
+
             Vector2 DistanceFromCenter = new Vector2(mouseX - (Screen.width / 2), Input.mousePosition.y - (Screen.height / 2));
             //current / total results in 0-1f range
             //Left side = current/midpoint | Right side = current/Screen width
             float minX = targetBounds.min.x;
             float maxX = targetBounds.max.x;
-            if (DistanceFromCenter.x <= 0 && maxX != right)
+
+            if (maxX >= right)
+            {
+                onRight = true;
+            }
+            else { onRight = false; }
+            if (minX <= left)
+            {
+                onLeft = true;
+            }
+            else { onLeft = false; }
+
+            /*Comment out these lines to disable shaking camera*/
+            Debug.Log(onLeft + "|" + onRight);
+
+            if (DistanceFromCenter.x <= 0)
             {
                 //Left Side
                 minX += (Input.mousePosition.x / (Screen.width / 2) - 1f) * maxMouseRangex;
             }
-            else if (minX != left)
+            else
             {
                 //Right side 
                 maxX += (Input.mousePosition.x / (Screen.width / 2) - 1f) * maxMouseRangex;
             }
+            /*Don't touch anything past this line*/
 
-            //Camera stops fine when stationary on left side, but there is a delay on the right side that causes it to snap over.
+            //Left side stops fine because left is checked first. Dynamically change order based on bound location?
             float shiftX = 0;
-            if (minX < left)
+            if (minX < left && !onRight)
             {
                 shiftX = minX - left;
-                Debug.Log("FireLeft");
+                //Debug.Log("FireLeft");
             }
-            else if (maxX > right)
+            else if (maxX > right && !onLeft)
             {
                 shiftX = maxX - right;
-                Debug.Log("FireRight");
+                //Debug.Log("FireRight");
             }
             left += shiftX;
             right += shiftX;
