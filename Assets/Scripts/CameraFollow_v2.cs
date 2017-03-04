@@ -7,6 +7,7 @@ public class CameraFollow_v2 : MonoBehaviour
 
     public Camera thisCamera;
     public Controller2D target;
+    private Collider2D thisCollider;
     public float verticalOffset;
     public Vector2 focusAreaSize;
     [Range(0.01f, 1f)]
@@ -23,16 +24,17 @@ public class CameraFollow_v2 : MonoBehaviour
     void Awake()
     {
         thisCamera = GetComponent<Camera>();
+        thisCollider = target.GetComponent<Collider2D>();
     }
 
     void Start()
     {
-        focusArea = new FocusArea(target.collider.bounds, focusAreaSize, focusMoveFraction, thisCamera);
+        focusArea = new FocusArea(thisCollider.bounds, focusAreaSize, focusMoveFraction, thisCamera);
     }
 
     void LateUpdate()
     {
-        focusArea.Update(target.collider.bounds);
+        focusArea.Update(thisCollider.bounds);
 
         Vector3 focusPosition = (Vector3)(focusArea.center + Vector2.up * verticalOffset);
 
@@ -47,12 +49,14 @@ public class CameraFollow_v2 : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        Gizmos.color = new Color(0, 0, 1, .5f);
-        Gizmos.DrawCube(focusArea.center, focusAreaSize);
-        Gizmos.color = new Color(0, 1, 0, .5f);
-        Gizmos.DrawCube(focusArea.focusPoint, new Vector2(0.2f, 0.2f));
-        Gizmos.color = new Color(1, 0, 0, .5f);
-        Gizmos.DrawCube(focusArea.center, focusAreaSize*focusMoveFraction);
+        if (enabled) {
+            Gizmos.color = new Color(0, 0, 1, .5f);
+            Gizmos.DrawCube(focusArea.center, focusAreaSize);
+            Gizmos.color = new Color(0, 1, 0, .5f);
+            Gizmos.DrawCube(focusArea.focusPoint, new Vector2(0.2f, 0.2f));
+            Gizmos.color = new Color(1, 0, 0, .5f);
+            Gizmos.DrawCube(focusArea.center, focusAreaSize*focusMoveFraction);
+        }
     }
 
     struct FocusArea
