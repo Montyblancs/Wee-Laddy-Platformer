@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 [RequireComponent(typeof(Controller2D))]
 public class Player : MonoBehaviour
@@ -21,6 +20,7 @@ public class Player : MonoBehaviour
 
     public GameObject bulletParentContainer;
     public GameObject projectileType;
+    public GameObject spawnPoint;
 
     public Camera playerCam;
 
@@ -78,6 +78,12 @@ public class Player : MonoBehaviour
                 velocity.y = 0;
             }
         }
+    }
+
+    public void Respawn()
+    {
+        velocity.y = 0;
+        transform.position = spawnPoint.transform.position;
     }
 
     public void SetDirectionalInput(Vector2 input)
@@ -157,7 +163,7 @@ public class Player : MonoBehaviour
         }
         else
         {
-            shotTarget.z = 20;
+            shotTarget.z = 21;
         }
 
         projectileScript.targetCoords = playerCam.ScreenToWorldPoint(shotTarget);

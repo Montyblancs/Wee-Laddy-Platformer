@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class CameraFollow : MonoBehaviour
 {
@@ -29,12 +28,12 @@ public class CameraFollow : MonoBehaviour
 
     void Start()
     {
-        focusArea = new FocusArea(target.collider.bounds, focusAreaSize);
+        focusArea = new FocusArea(target.colliderCust.bounds, focusAreaSize);
     }
 
     void LateUpdate()
     {
-        focusArea.Update(target.collider.bounds);
+        focusArea.Update(target.colliderCust.bounds);
 
         Vector2 focusPosition = focusArea.centre + Vector2.up * verticalOffset;
 
@@ -121,31 +120,41 @@ public class CameraFollow : MonoBehaviour
             //Left side = current/midpoint | Right side = current/Screen width
             float minX = targetBounds.min.x;
             float maxX = targetBounds.max.x;
+            //TargetBounds = The player's coordinates (not size)
+            //left/right = The container's edges
 
+            //Debug.Log("Max X:" + maxX + "|right:" + right);
             if (maxX >= right)
             {
                 onRight = true;
+                onLeft = false;
             }
-            else { onRight = false; }
-            if (minX <= left)
+            else if (minX <= left)
             {
                 onLeft = true;
+                onRight = false;
+            } else
+            {
+                onLeft = false;
+                onRight = false;
             }
-            else { onLeft = false; }
+
+            //Debug.Log("L:" + onLeft + "|R:" + onRight);
 
             /*Comment out these lines to disable shaking camera*/
-            Debug.Log(onLeft + "|" + onRight);
 
-            if (DistanceFromCenter.x <= 0)
-            {
-                //Left Side
-                minX += (Input.mousePosition.x / (Screen.width / 2) - 1f) * maxMouseRangex;
-            }
-            else
-            {
-                //Right side 
-                maxX += (Input.mousePosition.x / (Screen.width / 2) - 1f) * maxMouseRangex;
-            }
+            //if (DistanceFromCenter.x <= 0)
+            //{
+            //    //Left Side
+            //    float Result = (Input.mousePosition.x / (Screen.width / 2) - 1f) * maxMouseRangex;
+            //    minX += Result;
+            //}
+            //else
+            //{
+            //    //Right side 
+            //    float Result = (Input.mousePosition.x / (Screen.width / 2) - 1f) * maxMouseRangex;
+            //    maxX += Result;
+            //}
             /*Don't touch anything past this line*/
 
             //Left side stops fine because left is checked first. Dynamically change order based on bound location?
