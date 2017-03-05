@@ -34,28 +34,30 @@ public class CameraFollow_v2 : MonoBehaviour
     void Start()
     {
         focusArea = new FocusArea(thisCollider.bounds, focusAreaSize, focusShiftDeadzone, focusShiftAnchor, focusShiftIntensity, thisCamera);
+        transform.position = new Vector3(thisCollider.bounds.center.x, thisCollider.bounds.center.y, -10f);
     }
 
     void LateUpdate()
     {
         focusArea.Update(thisCollider.bounds);
 
-        Vector3 focusPosition = (focusArea.focusPoint + Vector3.up * verticalOffset) + Vector3.forward * -10;
+        // focus point in the focus area is on the same z plane as the target, so we can calculate distances properly.
+        Vector3 cameraFocusPoint = (focusArea.focusPoint + Vector3.up * verticalOffset);
+        Vector3 positionToFocus = cameraFocusPoint - transform.position;
         float snapDistance = 0.2f;
-        Vector3 positionToFocus = focusPosition - transform.position;
 
         // smoothly travel toward target position if we are not already there.
         if (positionToFocus.magnitude > snapDistance) {
-            transform.position = Vector3.Lerp(target.transform.position, focusPosition, 0.4f);
+            // Set the Camera to 10 units away from 0 in the z axis, which should be the background layer
+            transform.position = Vector3.Lerp(transform.position, new Vector3(cameraFocusPoint.x, cameraFocusPoint.y, -10f) , 0.4f);
         } else {
-            transform.position = focusPosition;
+            transform.position = new Vector3(cameraFocusPoint.x, cameraFocusPoint.y, -10f);
         }
 
         //Parallax Scrolling
-        focusPosition.x = focusPosition.x * BackgroundSpeed;
-        focusPosition.y = focusPosition.y * BackgroundSpeed;
-        BGParentObject.transform.position = focusPosition + Vector3.forward * 0;
-        bulletParentObject.transform.position = focusPosition;
+        cameraFocusPoint = new Vector3(transform.position.x * BackgroundSpeed, transform.position.y * BackgroundSpeed, 0.0f);
+        BGParentObject.transform.position = cameraFocusPoint;
+        bulletParentObject.transform.position = cameraFocusPoint;
     }
 
     void OnDrawGizmos()
@@ -103,8 +105,6 @@ public class CameraFollow_v2 : MonoBehaviour
         float deadzoneFraction;
         float shiftFraction;
         float shiftIntensity;
-        float left, right;
-        float top, bottom;
 
         public FocusArea(Bounds targetBounds, Vector2 size, float shiftDeadzone, float shiftAnchor, float shiftIntensityIn, Camera aCamera)
         {
@@ -117,10 +117,6 @@ public class CameraFollow_v2 : MonoBehaviour
             Vector3 limitSize = new Vector3(size.x, size.y, 1f);
             innerLimits = new Bounds(targetBounds.center, limitSize*deadzoneFraction);
             outerLimits = new Bounds(targetBounds.center, limitSize);
-            left = outerLimits.min.x;
-            right = outerLimits.max.x;
-            bottom = outerLimits.min.y;
-            top = outerLimits.max.y;
         }
 
         private Vector3 calcFocusPoint(Bounds targetBounds)
