@@ -11,7 +11,11 @@ public class CameraFollow_v2 : MonoBehaviour
     public float verticalOffset;
     public Vector2 focusAreaSize;
     [Range(0.01f, 1f)]
-    public float focusMoveFraction;
+    public float focusShiftDeadzone = 0.5f;
+    [Range(0.01f, 1f)]
+    public float focusShiftAnchor = 0.4f;
+    [Range(0.01f, 4f)]
+    public float focusShiftIntensity = 1f;
 
     //Paralax Vars
     public GameObject BGParentObject;
@@ -29,16 +33,23 @@ public class CameraFollow_v2 : MonoBehaviour
 
     void Start()
     {
-        focusArea = new FocusArea(thisCollider.bounds, focusAreaSize, focusMoveFraction, thisCamera);
+        focusArea = new FocusArea(thisCollider.bounds, focusAreaSize, focusShiftDeadzone, focusShiftAnchor, focusShiftIntensity, thisCamera);
     }
 
     void LateUpdate()
     {
         focusArea.Update(thisCollider.bounds);
 
-        Vector3 focusPosition = (Vector3)(focusArea.center + Vector2.up * verticalOffset);
+        Vector3 focusPosition = (focusArea.focusPoint + Vector3.up * verticalOffset) + Vector3.forward * -10;
+        float snapDistance = 0.2f;
+        Vector3 positionToFocus = focusPosition - transform.position;
 
-        transform.position = Vector3.Lerp(target.transform.position, focusPosition, 1f) + Vector3.forward * -10;
+        // smoothly travel toward target position if we are not already there.
+        if (positionToFocus.magnitude > snapDistance) {
+            transform.position = Vector3.Lerp(target.transform.position, focusPosition, 0.4f);
+        } else {
+            transform.position = focusPosition;
+        }
 
         //Parallax Scrolling
         focusPosition.x = focusPosition.x * BackgroundSpeed;
@@ -52,10 +63,10 @@ public class CameraFollow_v2 : MonoBehaviour
         if (enabled) {
             Gizmos.color = new Color(0, 0, 1, .5f);
             Gizmos.DrawCube(focusArea.center, focusAreaSize);
+            Gizmos.color = new Color(1, 0, 0, .5f);
+            Gizmos.DrawCube(focusArea.center, focusAreaSize*focusShiftDeadzone);
             Gizmos.color = new Color(0, 1, 0, .5f);
             Gizmos.DrawCube(focusArea.focusPoint, new Vector2(0.2f, 0.2f));
-            Gizmos.color = new Color(1, 0, 0, .5f);
-            Gizmos.DrawCube(focusArea.center, focusAreaSize*focusMoveFraction);
         }
     }
 
@@ -74,12 +85,12 @@ public class CameraFollow_v2 : MonoBehaviour
             get { return outerLimits.size; }
             set {
                 outerLimits.size = (Vector3)value;
-                innerLimits.size = (Vector3)value*fractionToMoveFocus;
+                innerLimits.size = (Vector3)value*deadzoneFraction;
             }
         }
         public Vector3 focusPoint
         {
-            get { return focusTriggerPoint; }
+            get { return focusCenterPoint; }
             set {
                 // do nothing for now
             }
@@ -88,17 +99,23 @@ public class CameraFollow_v2 : MonoBehaviour
         Bounds innerLimits;
         Bounds outerLimits;
         Vector3 focusTriggerPoint;
-        float fractionToMoveFocus;
+        Vector3 focusCenterPoint;
+        float deadzoneFraction;
+        float shiftFraction;
+        float shiftIntensity;
         float left, right;
         float top, bottom;
 
-        public FocusArea(Bounds targetBounds, Vector2 size, float focusMoveFraction, Camera aCamera)
+        public FocusArea(Bounds targetBounds, Vector2 size, float shiftDeadzone, float shiftAnchor, float shiftIntensityIn, Camera aCamera)
         {
             targetCamera = aCamera;
-            fractionToMoveFocus = focusMoveFraction;
+            deadzoneFraction = shiftDeadzone;
+            shiftFraction = shiftAnchor;
+            shiftIntensity = shiftIntensityIn;
             focusTriggerPoint = targetBounds.center;
+            focusCenterPoint = targetBounds.center;
             Vector3 limitSize = new Vector3(size.x, size.y, 1f);
-            innerLimits = new Bounds(targetBounds.center, limitSize*focusMoveFraction);
+            innerLimits = new Bounds(targetBounds.center, limitSize*deadzoneFraction);
             outerLimits = new Bounds(targetBounds.center, limitSize);
             left = outerLimits.min.x;
             right = outerLimits.max.x;
@@ -112,7 +129,7 @@ public class CameraFollow_v2 : MonoBehaviour
             Vector3 mousePosition = targetCamera.ScreenToWorldPoint(Input.mousePosition);
             // for now we have to set z to the same as the target for the 2d plane. Later we should adapt to be usable in 3d.
             mousePosition.z = targetBounds.center.z;
-            Vector3 focusPoint = Vector3.Lerp(targetBounds.center, mousePosition, fractionToMoveFocus);
+            Vector3 focusPoint = Vector3.Lerp(targetBounds.center, mousePosition, shiftFraction);
             return focusPoint;
         }
 
@@ -122,21 +139,27 @@ public class CameraFollow_v2 : MonoBehaviour
             focusTriggerPoint = calcFocusPoint(targetBounds);
 
             float intersectDistance = 0f;
+
+            innerLimits.center = targetBounds.center;
+            outerLimits.center = targetBounds.center;
             if (innerLimits.Contains(focusTriggerPoint) != true) {
-                Ray focusToCenterRay = new Ray(focusTriggerPoint, (targetBounds.center - focusTriggerPoint));
-                Ray centerToFocusRay = new Ray(targetBounds.center, (focusTriggerPoint - targetBounds.center));
-                Debug.DrawRay(centerToFocusRay.origin, (focusTriggerPoint - targetBounds.center), Color.green, 0);
+                Vector3 centerToFocusVector = (focusTriggerPoint - targetBounds.center);
+                Ray focusToCenterRay = new Ray(focusTriggerPoint, -centerToFocusVector);
+                Ray centerToFocusRay = new Ray(targetBounds.center, centerToFocusVector);
+                Debug.DrawRay(centerToFocusRay.origin, centerToFocusVector, Color.green, 0);
                 if (outerLimits.Contains(focusTriggerPoint) != true) {
                     // we want to limit the focus ray origin to the outer bounds, we set the origin of the ray to the bound intersect point.
                     if (outerLimits.IntersectRay(focusToCenterRay, out intersectDistance)) {
-                        focusToCenterRay = new Ray(focusToCenterRay.GetPoint(intersectDistance), (targetBounds.center - focusTriggerPoint));
+                        focusToCenterRay.origin = focusToCenterRay.GetPoint(intersectDistance);
                     }
                 }
-                // set the center of the limits to move a fraction of the vector bewteen the inner limit intersect point and the focus point.
+                // set the focus point to shift the distance from the edge of the bounds to the focus trigger.
                 if (innerLimits.IntersectRay(focusToCenterRay, out intersectDistance)) {
-                    innerLimits.center = Vector3.Lerp(targetBounds.center, centerToFocusRay.GetPoint(intersectDistance), 1f);
+                    focusCenterPoint = Vector3.Lerp(targetBounds.center, centerToFocusRay.GetPoint(intersectDistance * shiftIntensity), 1f);
                 }
-                outerLimits.center = innerLimits.center;
+            } else {
+                // while in the inner region, the camera will focus on the player.
+                focusCenterPoint = targetBounds.center;
             }
         }
     }
