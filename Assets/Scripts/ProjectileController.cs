@@ -54,12 +54,22 @@ public class ProjectileController : MonoBehaviour
 
                 if (eHit)
                 {
-                    //AudioClip pickedSound = ricSounds[Random.Range(0, ricSounds.Length)];
-                    //objectAudio.panStereo = inView.x;
-                    //objectAudio.PlayOneShot(pickedSound, 0.2f);
-                    //rend.enabled = false;
+                    AudioSource enemyAudio = eHit.transform.GetComponent<AudioSource>();
+                    if (enemyAudio)
+                    {
+                        Enemy eScript = eHit.transform.GetComponent<Enemy>();
+                        AudioClip pickedSound = eScript.deathSounds[Random.Range(0, eScript.deathSounds.Length)];
+                        enemyAudio.panStereo = inView.x;
+                        enemyAudio.PlayOneShot(pickedSound, 0.4f);
+                        rend.enabled = false;
+                        eScript.isDying = true;
+                        Destroy(eHit.transform.gameObject, pickedSound.length);
+                    }
+                    else
+                    {
+                        Destroy(eHit.transform.gameObject);
+                    }
                     Destroy(gameObject);
-                    Destroy(eHit.transform.gameObject);
                 }
 
                 RaycastHit2D wHit = Physics2D.Raycast(gameObject.transform.position, travelDirection, Time.deltaTime * bulletSpeed, collisionMask);
@@ -80,7 +90,7 @@ public class ProjectileController : MonoBehaviour
                 //RaycastHit2D hit = Physics2D.Raycast(gameObject.transform.position, travelDirection, Time.deltaTime * bulletSpeed, farCollisionMask);
                 RaycastHit wHit2;
                 RaycastHit eHit2;
-                
+
                 Debug.DrawRay(gameObject.transform.position, travelDirection, Color.red);
 
                 if (Physics.Raycast(gameObject.transform.position, travelDirection, out eHit2, Time.deltaTime * bulletSpeed, enemyMask, QueryTriggerInteraction.Ignore))
