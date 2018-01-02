@@ -1,0 +1,3 @@
+Make camera pan down when falling
+-Add negative y to current camera position
+-Don't have it fight with the cursor position?
