@@ -18,7 +18,8 @@ public class Player : MonoBehaviour
     public float wallSlideSpeedMax = 3;
     public float wallStickTime = .25f;
 
-    public GameObject bulletParentContainer;
+    public GameObject farBulletParentContainer;
+    public GameObject nearBulletParentContainer;
     public GameObject projectileType;
     public GameObject spawnPoint;
 
@@ -31,7 +32,7 @@ public class Player : MonoBehaviour
     float gravity;
     float maxJumpVelocity;
     float minJumpVelocity;
-    Vector3 velocity;
+    public Vector3 velocity;
     float velocityXSmoothing;
 
     Controller2D controller;
@@ -150,7 +151,11 @@ public class Player : MonoBehaviour
         GameObject thisProjectile = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
         if (shotDir == 1)
         {
-            thisProjectile.transform.parent = bulletParentContainer.transform;
+            thisProjectile.transform.parent = farBulletParentContainer.transform;
+        }
+        else
+        {
+            thisProjectile.transform.parent = nearBulletParentContainer.transform;
         }
         ProjectileController projectileScript = thisProjectile.GetComponent<ProjectileController>();
 

@@ -57,11 +57,25 @@ public class Enemy : MonoBehaviour
 
             if (targetToChase.transform.position.x < gameObject.transform.position.x)
             {
-                TowardsPlayer.x = -1f;
+                if (Vector3.Distance(targetToChase.transform.position, gameObject.transform.position) >= 6f)
+                {
+                    TowardsPlayer.x = -1f;
+                }
+                else if (Vector3.Distance(targetToChase.transform.position, gameObject.transform.position) <= 4f)
+                {
+                    TowardsPlayer.x = 1f;
+                }
             }
-            else
+            else if (targetToChase.transform.position.x >= gameObject.transform.position.x)
             {
-                TowardsPlayer.x = 1f;
+                if (Vector3.Distance(targetToChase.transform.position, gameObject.transform.position) >= 6f)
+                {
+                    TowardsPlayer.x = 1f;
+                }
+                else if (Vector3.Distance(targetToChase.transform.position, gameObject.transform.position) <= 4f)
+                {
+                    TowardsPlayer.x = -1f;
+                }
             }
 
             SetDirectionalInput(TowardsPlayer);
@@ -79,7 +93,8 @@ public class Enemy : MonoBehaviour
                     velocity.y = 0;
                 }
             }
-        } else
+        }
+        else
         {
             rend.enabled = false;
             if (isDying)
