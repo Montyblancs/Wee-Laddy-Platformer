@@ -8,11 +8,19 @@ public class Enemy : MonoBehaviour
     public float minJumpHeight = 1;
     public float timeToJumpApex = .4f;
     public GameObject targetToChase;
-    float accelerationTimeAirborne = .2f;
-    float accelerationTimeGrounded = .1f;
-    float moveSpeed = 6;
+    public float accelerationTimeAirborne = .2f;
+    public float accelerationTimeGrounded = .1f;
+    public float moveSpeed = 6;
+    public float shootDelay = 5;
+    public GameObject projectileType;
+    public GameObject enemyNearBulletParentContainer;
+    public Camera mainCam;
 
+    float timeToNextFire;
     float timeToWallUnstick;
+
+    AudioSource objectAudio;
+    public AudioClip shotSound;
 
     public AudioClip[] deathSounds;
 
@@ -44,6 +52,9 @@ public class Enemy : MonoBehaviour
         minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(gravity) * minJumpHeight);
 
         rend = GetComponent<Renderer>();
+
+        timeToNextFire = shootDelay;
+        objectAudio = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -92,6 +103,34 @@ public class Enemy : MonoBehaviour
                 {
                     velocity.y = 0;
                 }
+            }
+
+            if (timeToNextFire > 0)
+            {
+                timeToNextFire -= Time.deltaTime;
+            }
+            else
+            {
+                //Fire Projectile at player
+                var fireDirection = controller.collisions.faceDir;
+                if (wallSliding && fireDirection == wallDirX)
+                {
+                    fireDirection = fireDirection * -1;
+                }
+
+                GameObject thisProjectile = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
+                thisProjectile.transform.parent = enemyNearBulletParentContainer.transform;
+
+                ProjectileController projectileScript = thisProjectile.GetComponent<ProjectileController>();
+
+                Vector3 shotTarget = targetToChase.transform.position;
+                shotTarget.z = 0;
+
+                projectileScript.targetCoords = shotTarget;
+
+                objectAudio.PlayOneShot(shotSound, 0.3f);
+
+                timeToNextFire = shootDelay;
             }
         }
         else

@@ -12,6 +12,7 @@ public class ProjectileController : MonoBehaviour
     public LayerMask collisionMask;
     public LayerMask farCollisionMask;
     public LayerMask enemyMask;
+    public bool isEnemyBullet;
 
     AudioSource objectAudio;
     Renderer rend;
@@ -28,12 +29,13 @@ public class ProjectileController : MonoBehaviour
         //z direction needs to be altered to hit background targets, 0 for foreground targets
         travelDirection.z = targetCoords.z;
         travelDirection.Normalize();
+        Debug.Log(targetCoords.z);
+        Debug.Log(travelDirection);
     }
 
     // Update is called once per frame
     void Update()
     {
-        //Distant target on impact is not 1:1 with cursor
         if (rend.enabled)
         {
             transform.Translate(travelDirection * Time.deltaTime * bulletSpeed);
@@ -54,22 +56,29 @@ public class ProjectileController : MonoBehaviour
 
                 if (eHit)
                 {
-                    AudioSource enemyAudio = eHit.transform.GetComponent<AudioSource>();
-                    if (enemyAudio)
+                    if (isEnemyBullet)
                     {
-                        Enemy eScript = eHit.transform.GetComponent<Enemy>();
-                        AudioClip pickedSound = eScript.deathSounds[Random.Range(0, eScript.deathSounds.Length)];
-                        enemyAudio.panStereo = inView.x;
-                        enemyAudio.PlayOneShot(pickedSound, 0.4f);
-                        rend.enabled = false;
-                        eScript.isDying = true;
-                        Destroy(eHit.transform.gameObject, pickedSound.length);
+
                     }
                     else
                     {
-                        Destroy(eHit.transform.gameObject);
+                        AudioSource enemyAudio = eHit.transform.GetComponent<AudioSource>();
+                        if (enemyAudio)
+                        {
+                            Enemy eScript = eHit.transform.GetComponent<Enemy>();
+                            AudioClip pickedSound = eScript.deathSounds[Random.Range(0, eScript.deathSounds.Length)];
+                            enemyAudio.panStereo = inView.x;
+                            enemyAudio.PlayOneShot(pickedSound, 0.4f);
+                            rend.enabled = false;
+                            eScript.isDying = true;
+                            Destroy(eHit.transform.gameObject, pickedSound.length);
+                        }
+                        else
+                        {
+                            Destroy(eHit.transform.gameObject);
+                        }
+                        Destroy(gameObject);
                     }
-                    Destroy(gameObject);
                 }
 
                 RaycastHit2D wHit = Physics2D.Raycast(gameObject.transform.position, travelDirection, Time.deltaTime * bulletSpeed, collisionMask);
