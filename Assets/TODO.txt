@@ -1,2 +1,3 @@
-Make far enemies shoot towards player
-Advance AI logic a bit
+Allow player to be hit by enemy bullets
+Develop different shot types for the player
+Make pickups for shot types
