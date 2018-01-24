@@ -118,19 +118,37 @@ public class Enemy : MonoBehaviour
                     fireDirection = fireDirection * -1;
                 }
 
-                GameObject thisProjectile = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
-                thisProjectile.transform.parent = enemyNearBulletParentContainer.transform;
-
-                ProjectileController projectileScript = thisProjectile.GetComponent<ProjectileController>();
-
+                Vector3 bulletSpawnPoint = new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5);
                 Vector3 shotTarget = targetToChase.transform.position;
                 shotTarget.z = 0;
 
-                projectileScript.targetCoords = shotTarget;
+                Vector3 travelDirection;
+                travelDirection.x = shotTarget.x - bulletSpawnPoint.x;
+                travelDirection.y = shotTarget.y - bulletSpawnPoint.y;
+                //z direction needs to be altered to hit background targets, 0 for foreground targets
+                travelDirection.z = bulletSpawnPoint.z;
+                travelDirection.Normalize();
 
-                objectAudio.PlayOneShot(shotSound, 0.3f);
+                //50 is bullet speed * 5 here, pull from enemy shot type in the future
+                RaycastHit2D wHit = Physics2D.Raycast(gameObject.transform.position, travelDirection, Time.deltaTime * 50, controller.collisionMask);
+                if (!wHit)
+                {
+                    GameObject thisProjectile = Instantiate(projectileType, bulletSpawnPoint, Quaternion.identity);
+                    thisProjectile.transform.parent = enemyNearBulletParentContainer.transform;
 
-                timeToNextFire = shootDelay;
+                    ProjectileController projectileScript = thisProjectile.GetComponent<ProjectileController>();
+
+                    projectileScript.targetCoords = shotTarget;
+
+                    objectAudio.PlayOneShot(shotSound, 0.3f);
+
+                    timeToNextFire = shootDelay;
+                }
+                else
+                {
+                    //Try to shoot again with a miniscule timer
+                    timeToNextFire = 0.5f;
+                }
             }
         }
         else

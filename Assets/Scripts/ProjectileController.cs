@@ -29,8 +29,6 @@ public class ProjectileController : MonoBehaviour
         //z direction needs to be altered to hit background targets, 0 for foreground targets
         travelDirection.z = targetCoords.z;
         travelDirection.Normalize();
-        Debug.Log(targetCoords.z);
-        Debug.Log(travelDirection);
     }
 
     // Update is called once per frame
