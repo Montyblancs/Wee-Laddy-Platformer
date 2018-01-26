@@ -49,7 +49,9 @@ Temporary Items
 # Sublime Text Project workspace
 *.sublime-workspace
 
-# From GitHub's public .gitingore file for a Unity Project
+# =========================
+# From GitHubs's Unity.gitignore
+# =========================
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
