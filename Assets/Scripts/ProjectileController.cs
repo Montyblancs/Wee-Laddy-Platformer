@@ -7,6 +7,7 @@ public class ProjectileController : MonoBehaviour
     public float bulletSpeed;
     Vector3 spawnCoords;
     Vector3 travelDirection;
+    public AudioClip shotSound;
     public AudioClip[] ricSounds;
 
     public LayerMask collisionMask;

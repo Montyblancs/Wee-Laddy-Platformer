@@ -30,6 +30,11 @@ public class PlayerInput : MonoBehaviour
         {
             player.OnMouseButtonDown();
         }
+
+        if (Input.GetMouseButton(0))
+        {
+            player.OnMouseButtonHold();
+        }
         
         //Changing shooting plane
         if (Input.GetKeyDown(KeyCode.Q))

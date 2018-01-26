@@ -20,12 +20,17 @@ public class Player : MonoBehaviour
 
     public GameObject farBulletParentContainer;
     public GameObject nearBulletParentContainer;
+    public GameObject defaultProjectileType;
     public GameObject projectileType;
+    ProjectileController thisProjectileController;
+    AudioClip shotSound;
+    short currentShotType;
+    int specialRoundsLeft;
+    float specialFireRate;
+    float timeToNextFire;
     public GameObject spawnPoint;
 
     public Camera playerCam;
-
-    public AudioClip shotSound;
 
     float timeToWallUnstick;
 
@@ -59,6 +64,12 @@ public class Player : MonoBehaviour
         Cursor.SetCursor(FlatCursor, new Vector2(15, 15), CursorMode.Auto);
 
         objectAudio = GetComponent<AudioSource>();
+        thisProjectileController = projectileType.GetComponent<ProjectileController>();
+        shotSound = thisProjectileController.shotSound;
+        currentShotType = 0;
+        timeToNextFire = 0;
+        specialRoundsLeft = -1;
+        specialFireRate = -1;
     }
 
     void Update()
@@ -79,6 +90,9 @@ public class Player : MonoBehaviour
                 velocity.y = 0;
             }
         }
+
+        if(timeToNextFire > 0)
+            timeToNextFire -= Time.deltaTime;
     }
 
     public void Respawn()
@@ -92,6 +106,7 @@ public class Player : MonoBehaviour
         directionalInput = input;
     }
 
+    //Inputs
     public void OnJumpInputDown()
     {
         if (wallSliding)
@@ -139,41 +154,101 @@ public class Player : MonoBehaviour
 
     public void OnMouseButtonDown()
     {
-        var fireDirection = controller.collisions.faceDir;
-        //Determine if player is wall sliding, don't allow fire inside of wall
-        if (wallSliding && fireDirection == wallDirX)
+        //Semi-Auto fire only, see MouseButtonHold for full auto
+        if (currentShotType == 0)
         {
-            fireDirection = fireDirection * -1;
+            var fireDirection = controller.collisions.faceDir;
+            //Determine if player is wall sliding, don't allow fire inside of wall
+            if (wallSliding && fireDirection == wallDirX)
+            {
+                fireDirection = fireDirection * -1;
+            }
+
+            //Create a projectile that travels towards the current position of the mouse cursor.
+            //gameObject refers to the parent object of this script
+            GameObject thisProjectile = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
+            if (shotDir == 1)
+            {
+                thisProjectile.transform.parent = farBulletParentContainer.transform;
+            }
+            else
+            {
+                thisProjectile.transform.parent = nearBulletParentContainer.transform;
+            }
+            ProjectileController projectileScript = thisProjectile.GetComponent<ProjectileController>();
+
+            //Mouse position is not equal to position in game world, just the position on the screen.
+            //Need game world equivilent position for this coord.
+            Vector3 shotTarget = Input.mousePosition;
+            if (shotDir == 0)
+            {
+                shotTarget.z = 10;
+            }
+            else
+            {
+                shotTarget.z = 21;
+            }
+
+            projectileScript.targetCoords = playerCam.ScreenToWorldPoint(shotTarget);
+
+            objectAudio.PlayOneShot(shotSound, 0.3f);
+
+            if (specialRoundsLeft != -1)
+                specialRoundsLeft--;
+
+            if (specialRoundsLeft == 0)
+                ProjectileChange(defaultProjectileType, -1, 0, 0);
         }
 
-        //Create a projectile that travels towards the current position of the mouse cursor.
-        //gameObject refers to the parent object of this script
-        GameObject thisProjectile = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
-        if (shotDir == 1)
-        {
-            thisProjectile.transform.parent = farBulletParentContainer.transform;
-        }
-        else
-        {
-            thisProjectile.transform.parent = nearBulletParentContainer.transform;
-        }
-        ProjectileController projectileScript = thisProjectile.GetComponent<ProjectileController>();
+    }
 
-        //Mouse position is not equal to position in game world, just the position on the screen.
-        //Need game world equivilent position for this coord.
-        Vector3 shotTarget = Input.mousePosition;
-        if (shotDir == 0)
+    public void OnMouseButtonHold()
+    {
+        if (currentShotType == 1 && timeToNextFire <= 0)
         {
-            shotTarget.z = 10;
-        }
-        else
-        {
-            shotTarget.z = 21;
-        }
+            var fireDirection = controller.collisions.faceDir;
+            //Determine if player is wall sliding, don't allow fire inside of wall
+            if (wallSliding && fireDirection == wallDirX)
+            {
+                fireDirection = fireDirection * -1;
+            }
 
-        projectileScript.targetCoords = playerCam.ScreenToWorldPoint(shotTarget);
+            //Create a projectile that travels towards the current position of the mouse cursor.
+            //gameObject refers to the parent object of this script
+            GameObject thisProjectile = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
+            if (shotDir == 1)
+            {
+                thisProjectile.transform.parent = farBulletParentContainer.transform;
+            }
+            else
+            {
+                thisProjectile.transform.parent = nearBulletParentContainer.transform;
+            }
+            ProjectileController projectileScript = thisProjectile.GetComponent<ProjectileController>();
 
-        objectAudio.PlayOneShot(shotSound, 0.3f);
+            //Mouse position is not equal to position in game world, just the position on the screen.
+            //Need game world equivilent position for this coord.
+            Vector3 shotTarget = Input.mousePosition;
+            if (shotDir == 0)
+            {
+                shotTarget.z = 10;
+            }
+            else
+            {
+                shotTarget.z = 21;
+            }
+
+            projectileScript.targetCoords = playerCam.ScreenToWorldPoint(shotTarget);
+
+            objectAudio.PlayOneShot(shotSound, 0.3f);
+
+            timeToNextFire = specialFireRate;
+            if (specialRoundsLeft != -1)
+                specialRoundsLeft--;
+
+            if (specialRoundsLeft == 0)
+                ProjectileChange(defaultProjectileType, -1, 0, 0);
+        }
     }
 
     public void OnPlaneChange()
@@ -191,6 +266,18 @@ public class Player : MonoBehaviour
         }
     }
 
+    //Weapons
+    public void ProjectileChange(GameObject bulletType, int numShots, short fireType, float fireRate)
+    {
+        projectileType = bulletType;
+        specialRoundsLeft = numShots;
+        currentShotType = fireType;
+        specialFireRate = fireRate;
+        thisProjectileController = projectileType.GetComponent<ProjectileController>();
+        shotSound = thisProjectileController.shotSound;
+    }
+
+    //Movement
     void HandleWallSliding()
     {
         wallDirX = (controller.collisions.left) ? -1 : 1;
