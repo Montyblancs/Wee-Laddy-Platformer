@@ -1,3 +1,10 @@
-Allow player to be hit by enemy bullets
-Develop different shot types for the player
-Make pickups for shot types
+Damage player when hit by enemy bullets, or when running into enemy
+  -Make HP system
+Develop more weapons/pickups for the player
+Make a HUD
+Give player a dodge button with iFrames (both bullets and enemy collision immune)
+Make a far enemy that shoots from and moves around on background platforms
+Make a flying enemy
+Make an enemy that can take multiple hits
+Make a multi-part boss enemy (like a robot with a bunch of limbs)
+Refine camera movements and control, where possible.
