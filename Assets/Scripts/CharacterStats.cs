@@ -44,6 +44,8 @@ public class CharacterStats : MonoBehaviour {
 	private ConditionType condition;
 	// this will store any manually set condition for use in the updateCondition() function
 	private ConditionType pendingCondition;
+	// defines what condition this character will revive to if no condition is provided.
+	private ConditionType reviveCondition = ConditionType.HEALTHY;
 	// stores all the character's more permanant base statistics
 	private Dictionary<StatType, float> baseStats = new Dictionary<StatType, float>();
 	// stores all the character's current modifiers to stats
@@ -168,12 +170,15 @@ public class CharacterStats : MonoBehaviour {
 		if (this.characterName == "") {
 			this.characterName = "FartFace";
 		}
-		// For now, show thats in the debug log.
+		// For now, show thats is working in the debug
 		var allStats = this.getAllStats();
 		this.debugLogStatDictionary(allStats);
+		// now kill him
 		this.Condition = ConditionType.DEAD;
-		allStats = this.getAllStats();
-		this.debugLogStatDictionary(allStats);
+		Debug.Log("HP = "+this.HP);
+		// bring him back
+		this.revive();
+		Debug.Log("HP = "+this.HP);
 		// TODO: display stats on screen somehow.
 	}
 
@@ -197,7 +202,7 @@ public class CharacterStats : MonoBehaviour {
 		return 0f;
 	}
 
-	// return the maximum amount a stat can be modified relative to the base stat
+	// return the maximum amount a stat can be modified to relative to the base stat
 	public float getMaxAboveBase(StatType type)
 	{
 		float thisStat;
@@ -207,7 +212,7 @@ public class CharacterStats : MonoBehaviour {
 		return 0f;
 	}
 
-	// return the minimum amount a stat can be modified relative to 0
+	// return the minimum amount a stat can be modified to relative to 0
 	public float getMinBelowBase(StatType type)
 	{
 		float thisStat;
@@ -248,15 +253,17 @@ public class CharacterStats : MonoBehaviour {
 	}
 
 	// set a base stat to a value ONLY if they have this stat. otherwise don't do anything.
-	public void setBaseStatIfExists(StatType type, float value)
+	// this will not update any dependants so its kept private
+	private void setBaseStatIfExists(StatType type, float value)
 	{
 		if (this.baseStats.ContainsKey(type)) {
 			this.baseStats[type] = value;
 		}
 	}
 
-	// set a base stat to a value OR add it if it doesn't exist
-	public void setOrAddBaseStat(StatType type, float value)
+	// set a base stat to a value OR add it if it doesn't exist.
+	// this will not update any dependants so its kept private
+	private void setOrAddBaseStat(StatType type, float value)
 	{
 		if (this.baseStats.ContainsKey(type)) {
 			this.baseStats[type] = value;
@@ -265,17 +272,10 @@ public class CharacterStats : MonoBehaviour {
 		}
 	}
 
-	// set a modifier for a specified stat to the specified value
-	public void setStatMod(StatType type, float value)
+	// set a base stat to a value OR add it if it doesn't exist without updating any dependants
+	// this will not update any dependants so its kept private
+	private void setOrAddStatMod(StatType type, float value)
 	{
-		// don't do anything if the flag is set for this stat to be immutable.
-		if ((immutableStats & type) == type) return;
-		// LEFT OFF HEEEEEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEE debug and see if functions are doing what i think they are.
-		// make sure the value we set doesn't go beyond either the upper or lower limits
-		float newValue = Mathf.Clamp(value, this.getMinStat(type), this.getMinStat(type));
-		// don't bother adding a mod if its 0.
-		if (newValue == 0f) return;
-		// set the mod, add the item in the dictionary if it doesn't exist
 		if (this.modStats.ContainsKey(type)) {
 			this.modStats[type] = value;
 		} else {
@@ -283,7 +283,26 @@ public class CharacterStats : MonoBehaviour {
 		}
 	}
 
-	// Add the specified value to a modifier for the specified stat
+	// set a modifier for a specified stat to the specified value.
+	// The stat mod will be limited by other properties such as min and max, and immutable stat flags.
+	// This will update any dependants as well.
+	public void setStatMod(StatType type, float value)
+	{
+		// don't do anything if the flag is set for this stat to be immutable.
+		if ((immutableStats & type) == type) return;
+		// make sure the value we set doesn't go beyond either the upper or lower limits
+		float newValue = Mathf.Clamp(value, this.getMinStat(type)-this.getBaseStatOrZero(type), this.getMinStat(type));
+		// don't bother adding a mod if its 0.
+		if (newValue == 0f) return;
+		// set the mod, add the item in the dictionary if it doesn't exist
+		this.setOrAddStatMod(type, value);
+		// bitwise AND operation to determine if the flag is in the defined stat set for stats that Condition depends on.
+    	if ((this.conditionStats & type) == type) {
+    		this.updateCondition();
+    	}
+	}
+
+	// Add the specified value to a modifier for the specified stat and update any dependants
 	public void modStat(StatType type, float value)
 	{
 		// set the stat mod relative to its current mod value
@@ -291,20 +310,16 @@ public class CharacterStats : MonoBehaviour {
 	}
 
 
-	// set a modifier so that the effective stat of that type will equal the given value
+	// set a modifier so that the effective stat of that type will equal the given value and update any dependants
 	public void setStat(StatType type, float value)
 	{
 		// don't do anything if the flag is set for this stat to be immutable.
 		if ((immutableStats & type) == type) return;
 		// set the stat mod based on what the base stat is.
 		this.setStatMod(type, value - this.getBaseStatOrZero(type));
-		// bitwise AND operation to determine if the flag is in the defined stat set for stats that Condition depends on.
-    	if ((this.conditionStats & type) == type) {
-    		this.updateCondition();
-    	}
 	}
 
-	// remove all modifiers on a stat.
+	// remove all modifiers on a stat and update any dependants
 	public void removeStatMod(StatType type)
 	{
 		// don't do anything if the flag is set for this stat to be immutable.
@@ -313,6 +328,10 @@ public class CharacterStats : MonoBehaviour {
 		if (this.modStats.ContainsKey(type)) {
 			this.modStats.Remove(type);
 		}
+		// bitwise AND operation to determine if the flag is in the defined stat set for stats that Condition depends on.
+    	if ((this.conditionStats & type) == type) {
+    		this.updateCondition();
+    	}
 	}
 
 	// check all stats which would change the condition of this character
@@ -322,12 +341,11 @@ public class CharacterStats : MonoBehaviour {
 		if (this.pendingCondition != ConditionType.NONE) {
 			// force the stats to what they should be for this condition
 			if (this.pendingCondition == ConditionType.DEAD && this.HP != 0f) {
-				Debug.Log("yeah it ded");
 				// manually set the effective hp to 0
-				this.setStatMod(StatType.HP, 0f - this.getBaseStatOrZero(StatType.HP));
+				this.setOrAddStatMod(StatType.HP, 0f - this.getBaseStatOrZero(StatType.HP));
 			} else if (pendingCondition != ConditionType.DEAD && this.HP == 0f) {
 				// set the hp to the default revive percentage
-				this.setStatMod(StatType.HP, this.getBaseStatOrZero(StatType.HP) * StatExtensions.defaultRevivePercent);
+				this.setOrAddStatMod(StatType.HP, this.getReviveHPMod());
 			}
 			// If all stats were able to be modified, the logic below will update the condition.
 		}
@@ -342,8 +360,8 @@ public class CharacterStats : MonoBehaviour {
 		}
 		// check if the player has has come back from death
 		if (this.condition == ConditionType.DEAD && this.HP > 0f && this.pendingCondition == ConditionType.NONE) {
-			// if there is no pending condition, default to healthy for now
-			this.pendingCondition = ConditionType.HEALTHY;
+			// if there is no pending condition, set the condition to whatever is the default for reviving
+			this.pendingCondition = this.reviveCondition;
 		}
 		// if there is a condition to change to, do it
 		if (pendingCondition != ConditionType.NONE) {
@@ -452,10 +470,71 @@ public class CharacterStats : MonoBehaviour {
 		this.HP = 0;
 	}
 
-	// revive the character from death using the current revive percentage
+	// get the value hp will be at if this character is revived using provided percentage as a float, ranged 0.0f to 1.0f
+	public float getReviveHP(float percent)
+	{
+		float newHP = Mathf.Ceil(this.BaseHP * percent);
+		// make sure its at least 1
+		if (newHP < 1f) { newHP = 1f; }
+		return newHP;
+	}
+
+	// get the value for the stat modifier needed to set HP to the amount it should when this character is revived.
+	public float getReviveHPMod(float percent)
+	{
+		return this.BaseHP - this.getReviveHP(percent);
+	}
+
+	// get the value hp will be at if this character is revived with default properties
+	public float getReviveHP()
+	{
+		return this.getReviveHP(StatExtensions.defaultRevivePercent);
+	}
+
+	// get the value for the stat modifier needed to set HP to the amount it should when this character is revived using default properties
+	public float getReviveHPMod()
+	{
+		return this.BaseHP - this.getReviveHP();
+	}
+
+	// revive the character from death using the current defaults for reviving
 	public void revive()
 	{
+		// cannot revive if the character is not dead
+		if (this.Condition != ConditionType.DEAD) return;
+		// set HP to the default amount
+		this.HP = this.getReviveHP();
+	}
 
+	// revive the character from death and set hp to the specified percentage of base HP
+	public void revive(float percent)
+	{
+		// cannot revive to 0 hp
+		if (percent == 0f) return;
+		// cannot revive if the character is not dead
+		if (this.Condition != ConditionType.DEAD) return;
+		// set HP to the given percentage
+		this.HP = this.getReviveHP(percent);
+	}
+
+	// revive the character from death, set hp to the default percentage and set to specified condition
+	public void revive(ConditionType newCondition)
+	{
+		// cannot revive character back to dead
+		if (newCondition == ConditionType.DEAD) return;
+		this.pendingCondition = newCondition;
+		// revive to default given percentage
+		this.revive();
+	}
+
+	// revive the character from death, set hp to the specified percentage of base HP, and set to specified condition
+	public void revive(float percent, ConditionType newCondition)
+	{
+		// cannot revive character back to dead
+		if (newCondition == ConditionType.DEAD) return;
+		this.pendingCondition = newCondition;
+		// revive to the given percentage
+		this.revive(percent);
 	}
 	
 	// TODO: function to apply a temporary stat boost or debuff with different such as time or turns or ticks, whatever.
