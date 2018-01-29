@@ -8,6 +8,7 @@ public static class StatExtensions
 {
 	// bitwise stat variables for defining centralized stat types and conditions
     public static StatType RegenStats = StatType.HP | StatType.MP;
+    public static StatType positiveBaseStats = StatType.HP;
     // default percentage of HP that will be given when a character is revived.
     public static float defaultRevivePercent = 0.1f;
     
@@ -17,6 +18,13 @@ public static class StatExtensions
     {
     	// bitwise AND operation to determine if the flag is in the defined stat set.
     	return (RegenStats & stat) == stat ? true : false;
+    }
+
+    // check if this stat's base stat can be 0 or less.
+    public static bool needsPositiveBase(this StatType stat)
+    {
+    	// bitwise AND operation to determine if the flag is in the defined stat set.
+    	return (positiveBaseStats & stat) == stat ? true : false;
     }
 }
 
@@ -37,13 +45,17 @@ public enum StatType {
 public enum ConditionType {NONE, HEALTHY, KNOCKOUT, LIMBO, DEAD};
 
 public class CharacterStats : MonoBehaviour {
+	[SerializeField]
 	public string characterName;
+	[SerializeField]
 	public int level;
+	[SerializeField]
 	public int xp;
 	// the current condition of this player, health-wise
-	private ConditionType condition;
+	[HideInInspector, SerializeField]
+	private ConditionType condition = ConditionType.HEALTHY;
 	// this will store any manually set condition for use in the updateCondition() function
-	private ConditionType pendingCondition;
+	private ConditionType pendingCondition = ConditionType.NONE;
 	// defines what condition this character will revive to if no condition is provided.
 	private ConditionType reviveCondition = ConditionType.HEALTHY;
 	// stores all the character's more permanant base statistics
@@ -147,6 +159,7 @@ public class CharacterStats : MonoBehaviour {
 		}
 	}
 	// getter and setter for Condition, so we can be sure to have stats reflect this
+	[ExposeProperty]
 	public ConditionType Condition
 	{
 		get { return this.condition; }
@@ -159,14 +172,18 @@ public class CharacterStats : MonoBehaviour {
 
 	// All essential intialization after the component is instantiated and before the component gets enabled.
 	void Awake () {
-		// initialize all stats in the baseStats dictionary to a 4d6 dice roll, dropping the lowest
-		this.randomizeBaseStats();
+		// The line below will initialize all stats in the baseStats dictionary to a 4d6 dice roll, dropping the lowest
+		// TODO: use this if stats not set?
+		// this.randomizeBaseStats();
+		// make sure at least the base stat for HP is greater than zero
+		if (this.BaseHP <= 0f) {
+			this.BaseHP = 1;
+		}
 	}
 
 	// Initialization after the component first gets enabled. This happens on the very next Update() call.
 	void Start () {
 		// if there is no name, give it a name manually for now.
-		// TODO: just use the Unity object name instead?
 		if (this.characterName == "") {
 			this.characterName = "FartFace";
 		}
@@ -175,10 +192,10 @@ public class CharacterStats : MonoBehaviour {
 		this.debugLogStatDictionary(allStats);
 		// now kill him
 		this.Condition = ConditionType.DEAD;
-		Debug.Log("HP = "+this.HP);
+		Debug.Log("Base HP = "+this.BaseHP+", HP = "+this.HP);
 		// bring him back
 		this.revive();
-		Debug.Log("HP = "+this.HP);
+		Debug.Log("Base HP = "+this.BaseHP+", HP = "+this.HP);
 		// TODO: display stats on screen somehow.
 	}
 
@@ -188,6 +205,12 @@ public class CharacterStats : MonoBehaviour {
 		float thisStat;
 		if (this.baseStats.TryGetValue(type, out thisStat)) {
 			return thisStat;
+		}
+		// some stats can bever have a base value equal to or less than zero, so we need to fix it if its not.
+		if (type.needsPositiveBase()) {
+			// just set it to 1f for now
+			this.baseStats.Add(type, 1f);
+			return 1f;
 		}
 		return 0f;
 	}
@@ -265,6 +288,13 @@ public class CharacterStats : MonoBehaviour {
 	// this will not update any dependants so its kept private
 	private void setOrAddBaseStat(StatType type, float value)
 	{
+		// make sure we aren't setting anything non-positive that shouldn't be
+		if (type.needsPositiveBase() && value <= 0f) {
+			// just set it to 1f for now
+			this.baseStats.Add(type, 1f);
+			return;
+		}
+		// set the stat, and if its not in the dictionary yet, add it.
 		if (this.baseStats.ContainsKey(type)) {
 			this.baseStats[type] = value;
 		} else {
@@ -337,13 +367,17 @@ public class CharacterStats : MonoBehaviour {
 	// check all stats which would change the condition of this character
 	public void updateCondition()
 	{
+		// if there is no change in condition then its the same as no change in condition
+		if (this.pendingCondition == this.condition) {
+			this.pendingCondition = ConditionType.NONE;
+		}
 		// check if a forced condition is pending
 		if (this.pendingCondition != ConditionType.NONE) {
 			// force the stats to what they should be for this condition
 			if (this.pendingCondition == ConditionType.DEAD && this.HP != 0f) {
 				// manually set the effective hp to 0
 				this.setOrAddStatMod(StatType.HP, 0f - this.getBaseStatOrZero(StatType.HP));
-			} else if (pendingCondition != ConditionType.DEAD && this.HP == 0f) {
+			} else if (this.pendingCondition != ConditionType.DEAD && this.HP <= 0f) {
 				// set the hp to the default revive percentage
 				this.setOrAddStatMod(StatType.HP, this.getReviveHPMod());
 			}
@@ -353,6 +387,7 @@ public class CharacterStats : MonoBehaviour {
 		if (this.condition != ConditionType.DEAD && this.HP <= 0f) {
 			this.condition = ConditionType.DEAD;
 			Debug.Log("Oh shit, "+this.characterName+" just deadified.");
+			Debug.Log("Base HP = "+this.BaseHP+", HP = "+this.HP);
 			// clear any pending condition
 			this.pendingCondition = ConditionType.NONE;
 			// TODO: consider making HP immutable, so that the character has to be "revived" before they can heal?
@@ -364,9 +399,10 @@ public class CharacterStats : MonoBehaviour {
 			this.pendingCondition = this.reviveCondition;
 		}
 		// if there is a condition to change to, do it
-		if (pendingCondition != ConditionType.NONE) {
+		if (this.pendingCondition != ConditionType.NONE) {
 			this.condition = this.pendingCondition;
-			Debug.Log("Its ok, "+this.characterName+" is back in a "+this.condition.ToString()+" state");
+			Debug.Log("The character \""+this.characterName+"\" is now in a "+this.condition.ToString()+" state");
+			Debug.Log("Base HP = "+this.BaseHP+", HP = "+this.HP);
 			// clear any pending condition
 			this.pendingCondition = ConditionType.NONE;
 		}

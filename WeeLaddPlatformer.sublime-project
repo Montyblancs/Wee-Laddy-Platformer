@@ -4,6 +4,10 @@
 		{
 			"path": "Assets/Scripts",
 			"file_exclude_patterns": ["*.cs.meta"]
+		},
+		{
+			"path": "Assets/Editor",
+			"file_exclude_patterns": ["*.cs.meta"]
 		}
 	]
 }
