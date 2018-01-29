@@ -44,6 +44,31 @@ public enum StatType {
 // define the different conditions this character can be in
 public enum ConditionType {NONE, HEALTHY, KNOCKOUT, LIMBO, DEAD};
 
+// Defines a value for a stat of any of the enumerated StatType
+public struct StatPoint
+{
+	// The stats core value before any modifiers
+	public float baseValue;
+	// The amount this stat is modified relative to the baseValue
+	public float modifier;
+	// the minimun this stat can be modified to relative to 0
+	public float minBelowZero;
+	// TODO: figure out the best way to have no max value, possibly use Mathf.Inifinity or int.MaxValue?
+	// the max this stat can be modified to relative to the baseValue
+	public float maxAboveBase;
+
+	// generic full constructor
+	public StatPoint (float value, float mod, float min, float max)
+	{
+		this.baseValue = value;
+		this.modifier = mod;
+		this.minBelowZero = min;
+		this.maxAboveBase = max;
+	}
+	// TODO: create implicit operator functions for conversions between floats
+}
+
+// Manage a set of StatPoints for a character
 public class CharacterStats : MonoBehaviour {
 	[SerializeField]
 	public string characterName;
@@ -58,8 +83,8 @@ public class CharacterStats : MonoBehaviour {
 	private ConditionType pendingCondition = ConditionType.NONE;
 	// defines what condition this character will revive to if no condition is provided.
 	private ConditionType reviveCondition = ConditionType.HEALTHY;
+	// TODO: change code to use a single Dictionary of the StatType Enum to StatPoint Struct
 	// stores all the character's more permanant base statistics
-	[HideInInspector, SerializeField]
 	private Dictionary<StatType, float> baseStats = new Dictionary<StatType, float>();
 	// stores all the character's current modifiers to stats
 	private Dictionary<StatType, float> modStats = new Dictionary<StatType, float>();
