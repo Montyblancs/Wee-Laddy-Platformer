@@ -53,12 +53,13 @@ public class CharacterStats : MonoBehaviour {
 	public int xp;
 	// the current condition of this player, health-wise
 	[HideInInspector, SerializeField]
-	private ConditionType condition = ConditionType.HEALTHY;
+	private ConditionType condition;
 	// this will store any manually set condition for use in the updateCondition() function
 	private ConditionType pendingCondition = ConditionType.NONE;
 	// defines what condition this character will revive to if no condition is provided.
 	private ConditionType reviveCondition = ConditionType.HEALTHY;
 	// stores all the character's more permanant base statistics
+	[HideInInspector, SerializeField]
 	private Dictionary<StatType, float> baseStats = new Dictionary<StatType, float>();
 	// stores all the character's current modifiers to stats
 	private Dictionary<StatType, float> modStats = new Dictionary<StatType, float>();
@@ -116,6 +117,7 @@ public class CharacterStats : MonoBehaviour {
 	}
 	// getters and setters for base stats.
 	// This is for more permanant changes.
+	[ExposeProperty]
 	public float BaseHP
 	{
 		get { return this.getBaseStatOrZero(StatType.HP); }
@@ -518,7 +520,7 @@ public class CharacterStats : MonoBehaviour {
 	// get the value for the stat modifier needed to set HP to the amount it should when this character is revived.
 	public float getReviveHPMod(float percent)
 	{
-		return this.BaseHP - this.getReviveHP(percent);
+		return this.getReviveHP(percent) - this.BaseHP;
 	}
 
 	// get the value hp will be at if this character is revived with default properties
@@ -530,7 +532,7 @@ public class CharacterStats : MonoBehaviour {
 	// get the value for the stat modifier needed to set HP to the amount it should when this character is revived using default properties
 	public float getReviveHPMod()
 	{
-		return this.BaseHP - this.getReviveHP();
+		return this.getReviveHP() - this.BaseHP;
 	}
 
 	// revive the character from death using the current defaults for reviving
