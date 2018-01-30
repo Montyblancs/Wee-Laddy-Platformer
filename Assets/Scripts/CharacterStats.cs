@@ -206,30 +206,30 @@ public class CharacterStats : MonoBehaviour {
 	}
 	public float SPD
 	{
-		get { return this.getStat(StatType.MP); }
+		get { return this.getStat(StatType.SPD); }
 		set {
-			this.setStat(StatType.MP, value);
+			this.setStat(StatType.SPD, value);
 		}
 	}
 	public float STR
 	{
-		get { return this.getStat(StatType.MP); }
+		get { return this.getStat(StatType.STR); }
 		set {
-			this.setStat(StatType.MP, value);
+			this.setStat(StatType.STR, value);
 		}
 	}
 	public float DEX
 	{
-		get { return this.getStat(StatType.MP); }
+		get { return this.getStat(StatType.DEX); }
 		set {
-			this.setStat(StatType.MP, value);
+			this.setStat(StatType.DEX, value);
 		}
 	}
 	public float INT
 	{
-		get { return this.getStat(StatType.MP); }
+		get { return this.getStat(StatType.INT); }
 		set {
-			this.setStat(StatType.MP, value);
+			this.setStat(StatType.INT, value);
 		}
 	}
 	// getter and setter for Condition, so we can be sure to have stats reflect this
@@ -250,6 +250,7 @@ public class CharacterStats : MonoBehaviour {
         this._statSetKeys.Clear();
         this._statSetValues.Clear();
 
+        // TODO: possibly iterate through the enum instead of the dictionary, and store a 0 StatValue if not set in the dictionary?
         foreach (var kvp in this.statSet)
         {
             this._statSetKeys.Add(kvp.Key);
