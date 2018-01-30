@@ -19,5 +19,6 @@ using System.Collections;
 			return;
 		this.DrawDefaultInspector();
 		ExposeProperties.Expose(m_fields);
+		m_Instance.loadStatSet();
 	}
 }

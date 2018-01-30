@@ -44,31 +44,77 @@ public enum StatType {
 // define the different conditions this character can be in
 public enum ConditionType {NONE, HEALTHY, KNOCKOUT, LIMBO, DEAD};
 
-// Defines a value for a stat of any of the enumerated StatType
-public struct StatPoint
+// Defines a value for a stat to be assigne to any menber of the StatType enum
+[System.Serializable]
+public struct StatValue
 {
 	// The stats core value before any modifiers
 	public float baseValue;
 	// The amount this stat is modified relative to the baseValue
 	public float modifier;
-	// the minimun this stat can be modified to relative to 0
-	public float minBelowZero;
-	// TODO: figure out the best way to have no max value, possibly use Mathf.Inifinity or int.MaxValue?
-	// the max this stat can be modified to relative to the baseValue
-	public float maxAboveBase;
+	// the minimun this stat can be modified to relative to 0. Set to null for unlimited
+	public float? lowerLimit;
+	// the max this stat can be modified to relative to the baseValue. Set to null for unlimited
+	public float? upperLimit;
 
 	// generic full constructor
-	public StatPoint (float value, float mod, float min, float max)
+	public StatValue (float value = 0f, float mod = 0f, float? min = null, float? max = null)
 	{
 		this.baseValue = value;
 		this.modifier = mod;
-		this.minBelowZero = min;
-		this.maxAboveBase = max;
+		this.lowerLimit = min;
+		this.upperLimit = max;
 	}
-	// TODO: create implicit operator functions for conversions between floats
+	// conversion from float to StatValue.
+	// EX: StatValue statpoint = 15f; would result in a stat with baseValue of 15f
+    public static implicit operator StatValue(float value)
+    {
+        return new StatValue(value);
+    }
+    // conversion from float to StatValue.
+	// EX: StatValue statpoint = 15D; would result in a stat with baseValue of 15f
+    public static implicit operator StatValue(double value)
+    {
+        return new StatValue((float)value);
+    }
+    // conversion from float to StatValue.
+	// EX: StatValue statpoint = 15; would result in a stat with baseValue of 15f
+    public static implicit operator StatValue(int value)
+    {
+        return new StatValue((float)value);
+    }
+    // conversion from StatValue to float.
+	// EX: float statvalue = new StatValue(15f, 1f); would result in 16f
+    public static implicit operator float(StatValue value)
+    {
+        return value.baseValue + value.modifier;
+    }
+    // conversion from StatValue to double.
+	// EX: double statvalue = new StatValue(15f, 1f); would result in 16D
+    public static implicit operator double(StatValue value)
+    {
+        return (double)(float)value;
+    }
+    // conversion from StatValue to int.
+	// EX: int statvalue = new StatValue(15f, 1f); would result in 16
+    public static implicit operator int(StatValue value)
+    {
+        return (int)Mathf.Round((float)value);
+    }
+    // conversion from StatValue to string.
+	// EX: string statvalue = new StatValue(15f, 1f); would result in 16.00
+    public static implicit operator string(StatValue value)
+    {
+    	// output to 2 decimal places
+        return string.Format("{0:N2}", (float)value);
+    }
+    public string ToString()
+    {	
+    	return string.Format("{0:N2}", (this.baseValue + this.modifier));
+    }
 }
 
-// Manage a set of StatPoints for a character
+// Manage a set of StatValues for a character
 public class CharacterStats : MonoBehaviour {
 	[SerializeField]
 	public string characterName;
@@ -83,21 +129,67 @@ public class CharacterStats : MonoBehaviour {
 	private ConditionType pendingCondition = ConditionType.NONE;
 	// defines what condition this character will revive to if no condition is provided.
 	private ConditionType reviveCondition = ConditionType.HEALTHY;
-	// TODO: change code to use a single Dictionary of the StatType Enum to StatPoint Struct
-	// stores all the character's more permanant base statistics
-	private Dictionary<StatType, float> baseStats = new Dictionary<StatType, float>();
-	// stores all the character's current modifiers to stats
-	private Dictionary<StatType, float> modStats = new Dictionary<StatType, float>();
-	// stores the highest amount a stat can go, relative to its base stat
-	private Dictionary<StatType, float> maxAboveBase = new Dictionary<StatType, float>();
-	// stores the lowest amount a stat can go, relative to 0
-	private Dictionary<StatType, float> minBelowBase = new Dictionary<StatType, float>();
+	// Indexs a StatValue for each of the StateType enum
+	private Dictionary<StatType, StatValue> statSet = new Dictionary<StatType, StatValue>();
+	// lists for storing the dictionary data for serialization
+	[HideInInspector, SerializeField]
+	private List<StatType> _statSetKeys = new List<StatType> {};
+	[HideInInspector, SerializeField]
+	private List<StatValue> _statSetValues = new List<StatValue> {};
 	// bitwise flags to define the stat types that the condition is dependant upon, so we know when to update it.
 	private StatType conditionStats = StatType.HP;
 	// flags to define what stats cannot be modified. Initially this is will be no stat types.
 	private StatType immutableStats = StatType.NONE;
+	// getters and setters for base stats.
+	[ExposeProperty]
+	public float BaseHP
+	{
+		get { return this.getBaseStatOrZero(StatType.HP); }
+		set {
+			this.setOrAddBaseStat(StatType.HP, value);
+		}
+	}
+	[ExposeProperty]
+	public float BaseMP
+	{
+		get { return this.getBaseStatOrZero(StatType.MP); }
+		set {
+			this.setOrAddBaseStat(StatType.MP, value);
+		}
+	}
+	[ExposeProperty]
+	public float BaseSPD
+	{
+		get { return this.getBaseStatOrZero(StatType.SPD); }
+		set {
+			this.setOrAddBaseStat(StatType.SPD, value);
+		}
+	}
+	[ExposeProperty]
+	public float BaseSTR
+	{
+		get { return this.getBaseStatOrZero(StatType.STR); }
+		set {
+			this.setOrAddBaseStat(StatType.STR, value);
+		}
+	}
+	[ExposeProperty]
+	public float BaseDEX
+	{
+		get { return this.getBaseStatOrZero(StatType.DEX); }
+		set {
+			this.setOrAddBaseStat(StatType.DEX, value);
+		}
+	}
+	[ExposeProperty]
+	public float BaseINT
+	{
+		get { return this.getBaseStatOrZero(StatType.INT); }
+		set {
+			this.setOrAddBaseStat(StatType.INT, value);
+		}
+	}
 	// getters and setters for each effective stat
-	// these will get changed when we don't want to make less permanant stat mods.
 	public float HP
 	{
 		get { return this.getStat(StatType.HP); }
@@ -140,51 +232,6 @@ public class CharacterStats : MonoBehaviour {
 			this.setStat(StatType.MP, value);
 		}
 	}
-	// getters and setters for base stats.
-	// This is for more permanant changes.
-	[ExposeProperty]
-	public float BaseHP
-	{
-		get { return this.getBaseStatOrZero(StatType.HP); }
-		set {
-			this.setOrAddBaseStat(StatType.HP, value);
-		}
-	}
-	public float BaseMP
-	{
-		get { return this.getBaseStatOrZero(StatType.MP); }
-		set {
-			this.setOrAddBaseStat(StatType.MP, value);
-		}
-	}
-	public float BaseSPD
-	{
-		get { return this.getBaseStatOrZero(StatType.SPD); }
-		set {
-			this.setOrAddBaseStat(StatType.SPD, value);
-		}
-	}
-	public float BaseSTR
-	{
-		get { return this.getBaseStatOrZero(StatType.STR); }
-		set {
-			this.setOrAddBaseStat(StatType.STR, value);
-		}
-	}
-	public float BaseDEX
-	{
-		get { return this.getBaseStatOrZero(StatType.DEX); }
-		set {
-			this.setOrAddBaseStat(StatType.DEX, value);
-		}
-	}
-	public float BaseINT
-	{
-		get { return this.getBaseStatOrZero(StatType.INT); }
-		set {
-			this.setOrAddBaseStat(StatType.INT, value);
-		}
-	}
 	// getter and setter for Condition, so we can be sure to have stats reflect this
 	[ExposeProperty]
 	public ConditionType Condition
@@ -197,11 +244,31 @@ public class CharacterStats : MonoBehaviour {
 		}
 	}
 
+	// Unity doesn't support dictoinary serialization, so we transfer the data to a list of keys and values first.
+	public void storeStatSet()
+    {
+        this._statSetKeys.Clear();
+        this._statSetValues.Clear();
+
+        foreach (var kvp in this.statSet)
+        {
+            this._statSetKeys.Add(kvp.Key);
+            this._statSetValues.Add(kvp.Value);
+        }
+    }
+    // Load the data from the the key and value lists back into the dictionary
+    public void loadStatSet()
+    {
+        this.statSet = new Dictionary<StatType, StatValue>();
+
+        for (int i = 0; i != Math.Min(this._statSetKeys.Count, this._statSetValues.Count); i++)
+            this.statSet.Add(this._statSetKeys[i], this._statSetValues[i]);
+    }
+
 	// All essential intialization after the component is instantiated and before the component gets enabled.
 	void Awake () {
-		// The line below will initialize all stats in the baseStats dictionary to a 4d6 dice roll, dropping the lowest
-		// TODO: use this if stats not set?
-		// this.randomizeBaseStats();
+		// because dictionaries are nto serializable, we will load the data from lists first
+		this.loadStatSet();
 		// make sure at least the base stat for HP is greater than zero
 		if (this.BaseHP <= 0f) {
 			this.BaseHP = 1;
@@ -217,83 +284,93 @@ public class CharacterStats : MonoBehaviour {
 		// For now, show thats is working in the debug
 		var allStats = this.getAllStats();
 		this.debugLogStatDictionary(allStats);
-		// now kill him
-		this.Condition = ConditionType.DEAD;
-		Debug.Log("Base HP = "+this.BaseHP+", HP = "+this.HP);
-		// bring him back
-		this.revive();
-		Debug.Log("Base HP = "+this.BaseHP+", HP = "+this.HP);
 		// TODO: display stats on screen somehow.
 	}
 
-	// return the base stat if it exists, otherwise return 0
-	public float getBaseStatOrZero(StatType type)
+	void OnGUI () {
+		this.loadStatSet();
+	}
+
+	// return the StatValue of the specified type if it exists in the statSet. Otherwise return a 0 StatValue
+	public StatValue getStatValue(StatType type)
 	{
-		float thisStat;
-		if (this.baseStats.TryGetValue(type, out thisStat)) {
+		StatValue thisStat;
+		if (this.statSet.TryGetValue(type, out thisStat)) {
 			return thisStat;
 		}
 		// some stats can bever have a base value equal to or less than zero, so we need to fix it if its not.
 		if (type.needsPositiveBase()) {
 			// just set it to 1f for now
-			this.baseStats.Add(type, 1f);
-			return 1f;
+			StatValue defaultValue = 1f;
+			this.statSet.Add(type, defaultValue);
+			return defaultValue;
 		}
-		return 0f;
+		return thisStat;
+	}
+
+	// return the base stat if it exists, otherwise return 0
+	public float getBaseStatOrZero(StatType type)
+	{
+		StatValue thisStat = this.getStatValue(type);
+		return thisStat.baseValue;
 	}
 
 	// return the mod stat if it exists, otherwise return 0
 	public float getStatMod(StatType type)
 	{
-		float thisStat;
-		if (this.modStats.TryGetValue(type, out thisStat)) {
-			return thisStat;
-		}
-		return 0f;
+		StatValue thisStat = this.getStatValue(type);
+		return thisStat.modifier;
 	}
 
 	// return the maximum amount a stat can be modified to relative to the base stat
-	public float getMaxAboveBase(StatType type)
+	public float? getUpperLimit(StatType type)
 	{
-		float thisStat;
-		if (this.maxAboveBase.TryGetValue(type, out thisStat)) {
-			return thisStat;
+		StatValue thisStat = this.getStatValue(type);
+		// if both limits are non-null, return the larger one to avoid logic that prevents all values
+		if (thisStat.upperLimit != null && thisStat.lowerLimit != null && thisStat.lowerLimit > thisStat.upperLimit) {
+			return thisStat.lowerLimit;
 		}
-		return 0f;
+		return thisStat.upperLimit;
 	}
 
 	// return the minimum amount a stat can be modified to relative to 0
-	public float getMinBelowBase(StatType type)
+	public float? getLowerLimit(StatType type)
 	{
-		float thisStat;
-		if (this.minBelowBase.TryGetValue(type, out thisStat)) {
-			return thisStat;
+		StatValue thisStat = this.getStatValue(type);
+		// if both limits are non-null, return the larger one to avoid logic that prevents all values
+		if (thisStat.upperLimit != null && thisStat.lowerLimit != null && thisStat.lowerLimit > thisStat.upperLimit) {
+			return thisStat.upperLimit;
 		}
-		return 0f;
+		return thisStat.lowerLimit;
 	}
 
-	// return the maximum amount an effective stat can be
-	public float getMaxStat(StatType type)
+	// return the maximum amount an effective stat can be. return null if it is not limited
+	public float? getMaxStat(StatType type)
 	{
-		return this.getBaseStatOrZero(type) + this.getMaxAboveBase(type);
+		float? limit = this.getUpperLimit(type);
+		if (limit == null) return null;
+		return this.getBaseStatOrZero(type) + this.getUpperLimit(type);
 	}
 
-	// return the minimum amount an effective stat can be
-	public float getMinStat(StatType type)
+	// return the minimum amount an effective stat can be. return null if it is not limited
+	public float? getMinStat(StatType type)
 	{
-		return this.getMinBelowBase(type);
+		float? limit = this.getLowerLimit(type);
+		if (limit == null) return null;
+		return this.getLowerLimit(type);
 	}
 
 	// get the effective stat, with all modifiers applied.
 	public float getStat(StatType type)
 	{
-		return this.getBaseStatOrZero(type) + this.getStatMod(type);
+		StatValue thisStat = this.getStatValue(type);
+		return thisStat.baseValue + thisStat.modifier;
 	}
 
 	// return all effective stats in one Dictionary
-	public Dictionary<StatType, float> getAllStats()
+	public Dictionary<StatType, StatValue> getAllStats()
 	{
-		Dictionary<StatType, float> allStats = new Dictionary<StatType, float>();
+		Dictionary<StatType, StatValue> allStats = new Dictionary<StatType, StatValue>();
 		foreach(StatType stat in Enum.GetValues(typeof(StatType))) {
 			if (stat != StatType.NONE) {
 				allStats.Add(stat, this.getStat(stat));
@@ -306,9 +383,11 @@ public class CharacterStats : MonoBehaviour {
 	// this will not update any dependants so its kept private
 	private void setBaseStatIfExists(StatType type, float value)
 	{
-		if (this.baseStats.ContainsKey(type)) {
-			this.baseStats[type] = value;
+		if (this.statSet.ContainsKey(type)) {
+			this.statSet[type] = new StatValue(value, this.statSet[type].modifier, this.statSet[type].lowerLimit, this.statSet[type].upperLimit);
 		}
+		// store the Dictionary into serializable lists after any change
+		this.storeStatSet();
 	}
 
 	// set a base stat to a value OR add it if it doesn't exist.
@@ -318,26 +397,29 @@ public class CharacterStats : MonoBehaviour {
 		// make sure we aren't setting anything non-positive that shouldn't be
 		if (type.needsPositiveBase() && value <= 0f) {
 			// just set it to 1f for now
-			this.baseStats.Add(type, 1f);
-			return;
+			value = 1f;
 		}
 		// set the stat, and if its not in the dictionary yet, add it.
-		if (this.baseStats.ContainsKey(type)) {
-			this.baseStats[type] = value;
+		if (this.statSet.ContainsKey(type)) {
+			this.statSet[type] = new StatValue(value, this.statSet[type].modifier, this.statSet[type].lowerLimit, this.statSet[type].upperLimit);
 		} else {
-			this.baseStats.Add(type, value);
+			this.statSet.Add(type, value);
 		}
+		// store the Dictionary into serializable lists after any change
+		this.storeStatSet();
 	}
 
 	// set a base stat to a value OR add it if it doesn't exist without updating any dependants
 	// this will not update any dependants so its kept private
 	private void setOrAddStatMod(StatType type, float value)
 	{
-		if (this.modStats.ContainsKey(type)) {
-			this.modStats[type] = value;
+		if (this.statSet.ContainsKey(type)) {
+			this.statSet[type] = new StatValue(this.statSet[type].baseValue, value, this.statSet[type].lowerLimit, this.statSet[type].upperLimit);
 		} else {
-			this.modStats.Add(type, value);
+			this.statSet.Add(type, new StatValue(0f, value));
 		}
+		// store the Dictionary into serializable lists after any change
+		this.storeStatSet();
 	}
 
 	// set a modifier for a specified stat to the specified value.
@@ -347,8 +429,24 @@ public class CharacterStats : MonoBehaviour {
 	{
 		// don't do anything if the flag is set for this stat to be immutable.
 		if ((immutableStats & type) == type) return;
-		// make sure the value we set doesn't go beyond either the upper or lower limits
-		float newValue = Mathf.Clamp(value, this.getMinStat(type)-this.getBaseStatOrZero(type), this.getMinStat(type));
+		StatValue thisStat = this.getStatValue(type);
+		float? lowerLimit = this.getLowerLimit(type);
+		float? upperLimit = this.getUpperLimit(type);
+		float newValue = value;
+		// make sure the value we set don't go beyond lower limit if there is one
+		if (lowerLimit != null) {
+			lowerLimit = lowerLimit - thisStat.baseValue;
+			if (value < lowerLimit) {
+				newValue = (float)lowerLimit;
+			}
+		}
+		// make sure the value we set don't go beyond upper limit if there is one
+		if (upperLimit != null) {
+			upperLimit = upperLimit + thisStat.baseValue;
+			if (value > upperLimit) {
+				newValue = (float)upperLimit;
+			}
+		}
 		// don't bother adding a mod if its 0.
 		if (newValue == 0f) return;
 		// set the mod, add the item in the dictionary if it doesn't exist
@@ -381,14 +479,10 @@ public class CharacterStats : MonoBehaviour {
 	{
 		// don't do anything if the flag is set for this stat to be immutable.
 		if ((immutableStats & type) == type) return;
-		// remove any items for this stat from the stat mod dictionary
-		if (this.modStats.ContainsKey(type)) {
-			this.modStats.Remove(type);
+		// set the mod to zero for this stat if it is in the set
+		if (this.statSet.ContainsKey(type)) {
+			this.setStatMod(type, 0f);
 		}
-		// bitwise AND operation to determine if the flag is in the defined stat set for stats that Condition depends on.
-    	if ((this.conditionStats & type) == type) {
-    		this.updateCondition();
-    	}
 	}
 
 	// check all stats which would change the condition of this character
@@ -480,9 +574,9 @@ public class CharacterStats : MonoBehaviour {
 	}
 
 	// write a line in the debug window showing each element in the dictionary specified
-	public void debugLogStatDictionary(Dictionary<StatType, float> theseStats)
+	public void debugLogStatDictionary(Dictionary<StatType, StatValue> theseStats)
 	{
-		foreach (KeyValuePair<StatType, float> stat in theseStats) {
+		foreach (KeyValuePair<StatType, StatValue> stat in theseStats) {
 			Debug.Log(""+stat.Key.ToString()+": "+stat.Value.ToString());
 		}
 	}
@@ -491,7 +585,7 @@ public class CharacterStats : MonoBehaviour {
 	public void debugLogBaseStats()
 	{
 		Debug.Log("Base Stats for Character with the name \""+this.characterName+"\" will be displayed next.");
-		this.debugLogStatDictionary(baseStats);
+		this.debugLogStatDictionary(this.statSet);
 	}
 
 	/**
@@ -536,7 +630,7 @@ public class CharacterStats : MonoBehaviour {
 	// get the value hp will be at if this character is revived using provided percentage as a float, ranged 0.0f to 1.0f
 	public float getReviveHP(float percent)
 	{
-		float newHP = Mathf.Ceil(this.BaseHP * percent);
+		float newHP = Mathf.Round(this.BaseHP * percent);
 		// make sure its at least 1
 		if (newHP < 1f) { newHP = 1f; }
 		return newHP;
