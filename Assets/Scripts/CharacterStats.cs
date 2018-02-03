@@ -11,6 +11,14 @@ public static class StatExtensions
     public static StatType positiveBaseStats = StatType.HP;
     // default percentage of HP that will be given when a character is revived.
     public static float defaultRevivePercent = 0.1f;
+    // default lower limits for stats
+    public static Dictionary<StatType,float> defaultLowerLimits = new Dictionary<StatType, float> {
+	    {StatType.HP, 0f},
+	};
+	// default upper limits for stats
+    public static Dictionary<StatType,float> defaultUpperLimits = new Dictionary<StatType, float> {
+	    {StatType.HP, 0f},
+	};
     
     // this may not be the best method or used in the future, but i wanted to keep it here for future referance.
     // This would allow one to do something like stat.canAutoRegen
@@ -25,6 +33,25 @@ public static class StatExtensions
     {
     	// bitwise AND operation to determine if the flag is in the defined stat set.
     	return (positiveBaseStats & stat) == stat ? true : false;
+    }
+
+    // get the default limit if there is one set, otherwise get null
+    public static float? getDefaultLowerLimit(this StatType stat)
+    {
+    	float limit;
+    	if (defaultLowerLimits.TryGetValue(stat, out limit)) {
+    		return limit;
+    	}
+    	return null;
+    }
+    // get the default limit if there is one set, otherwise get null
+    public static float? getDefaultUpperLimit(this StatType stat)
+    {
+    	float limit;
+    	if (defaultUpperLimits.TryGetValue(stat, out limit)) {
+    		return limit;
+    	}
+    	return null;
     }
 }
 
@@ -141,52 +168,46 @@ public class CharacterStats : MonoBehaviour {
 	// flags to define what stats cannot be modified. Initially this is will be no stat types.
 	private StatType immutableStats = StatType.NONE;
 	// getters and setters for base stats.
-	[ExposeProperty]
 	public float BaseHP
 	{
 		get { return this.getBaseStatOrZero(StatType.HP); }
 		set {
-			this.setOrAddBaseStat(StatType.HP, value);
+			this.setBaseStat(StatType.HP, value);
 		}
 	}
-	[ExposeProperty]
 	public float BaseMP
 	{
 		get { return this.getBaseStatOrZero(StatType.MP); }
 		set {
-			this.setOrAddBaseStat(StatType.MP, value);
+			this.setBaseStat(StatType.MP, value);
 		}
 	}
-	[ExposeProperty]
 	public float BaseSPD
 	{
 		get { return this.getBaseStatOrZero(StatType.SPD); }
 		set {
-			this.setOrAddBaseStat(StatType.SPD, value);
+			this.setBaseStat(StatType.SPD, value);
 		}
 	}
-	[ExposeProperty]
 	public float BaseSTR
 	{
 		get { return this.getBaseStatOrZero(StatType.STR); }
 		set {
-			this.setOrAddBaseStat(StatType.STR, value);
+			this.setBaseStat(StatType.STR, value);
 		}
 	}
-	[ExposeProperty]
 	public float BaseDEX
 	{
 		get { return this.getBaseStatOrZero(StatType.DEX); }
 		set {
-			this.setOrAddBaseStat(StatType.DEX, value);
+			this.setBaseStat(StatType.DEX, value);
 		}
 	}
-	[ExposeProperty]
 	public float BaseINT
 	{
 		get { return this.getBaseStatOrZero(StatType.INT); }
 		set {
-			this.setOrAddBaseStat(StatType.INT, value);
+			this.setBaseStat(StatType.INT, value);
 		}
 	}
 	// getters and setters for each effective stat
@@ -327,9 +348,9 @@ public class CharacterStats : MonoBehaviour {
 	public float? getUpperLimit(StatType type)
 	{
 		StatValue thisStat = this.getStatValue(type);
-		// if both limits are non-null, return the larger one to avoid logic that prevents all values
-		if (thisStat.upperLimit != null && thisStat.lowerLimit != null && thisStat.lowerLimit > thisStat.upperLimit) {
-			return thisStat.lowerLimit;
+		// if its null we will try and get the default for this stat
+		if (thisStat.upperLimit == null) {
+			return type.getDefaultUpperLimit();
 		}
 		return thisStat.upperLimit;
 	}
@@ -338,9 +359,9 @@ public class CharacterStats : MonoBehaviour {
 	public float? getLowerLimit(StatType type)
 	{
 		StatValue thisStat = this.getStatValue(type);
-		// if both limits are non-null, return the larger one to avoid logic that prevents all values
-		if (thisStat.upperLimit != null && thisStat.lowerLimit != null && thisStat.lowerLimit > thisStat.upperLimit) {
-			return thisStat.upperLimit;
+		// if its null we will try and get the default for this stat
+		if (thisStat.lowerLimit == null) {
+			return type.getDefaultLowerLimit();
 		}
 		return thisStat.lowerLimit;
 	}
@@ -410,6 +431,20 @@ public class CharacterStats : MonoBehaviour {
 		this.storeStatSet();
 	}
 
+	// set a base stat to a value OR add it if it doesn't exist.
+	// this public version will update dependants
+	public void setBaseStat(StatType type, float value)
+	{
+		// don't do anything if the flag is set for this stat to be immutable.
+		if ((immutableStats & type) == type) return;
+		// set the stat
+		this.setOrAddBaseStat(type, value);
+		// bitwise AND operation to determine if the flag is in the defined stat set for stats that Condition depends on.
+    	if ((this.conditionStats & type) == type) {
+    		this.updateCondition();
+    	}
+	}
+
 	// set a base stat to a value OR add it if it doesn't exist without updating any dependants
 	// this will not update any dependants so its kept private
 	private void setOrAddStatMod(StatType type, float value)
@@ -443,15 +478,15 @@ public class CharacterStats : MonoBehaviour {
 		}
 		// make sure the value we set don't go beyond upper limit if there is one
 		if (upperLimit != null) {
-			upperLimit = upperLimit + thisStat.baseValue;
+			upperLimit = upperLimit;
 			if (value > upperLimit) {
 				newValue = (float)upperLimit;
 			}
 		}
-		// don't bother adding a mod if its 0.
-		if (newValue == 0f) return;
+		// don't bother adding a mod if its not even changed.
+		if (newValue == this.getStatMod(type)) return;
 		// set the mod, add the item in the dictionary if it doesn't exist
-		this.setOrAddStatMod(type, value);
+		this.setOrAddStatMod(type, newValue);
 		// bitwise AND operation to determine if the flag is in the defined stat set for stats that Condition depends on.
     	if ((this.conditionStats & type) == type) {
     		this.updateCondition();
@@ -464,7 +499,6 @@ public class CharacterStats : MonoBehaviour {
 		// set the stat mod relative to its current mod value
 		this.setStatMod(type, this.getStatMod(type) + value);
 	}
-
 
 	// set a modifier so that the effective stat of that type will equal the given value and update any dependants
 	public void setStat(StatType type, float value)
@@ -508,11 +542,10 @@ public class CharacterStats : MonoBehaviour {
 		// if HP is below 0, this character is dead no matter what
 		if (this.condition != ConditionType.DEAD && this.HP <= 0f) {
 			this.condition = ConditionType.DEAD;
-			Debug.Log("Oh shit, "+this.characterName+" just deadified.");
-			Debug.Log("Base HP = "+this.BaseHP+", HP = "+this.HP);
 			// clear any pending condition
 			this.pendingCondition = ConditionType.NONE;
 			// TODO: consider making HP immutable, so that the character has to be "revived" before they can heal?
+			Debug.Log("The character \""+this.characterName+"\" is now in a "+this.condition.ToString()+" state");
 			return;
 		}
 		// check if the player has has come back from death
@@ -524,7 +557,6 @@ public class CharacterStats : MonoBehaviour {
 		if (this.pendingCondition != ConditionType.NONE) {
 			this.condition = this.pendingCondition;
 			Debug.Log("The character \""+this.characterName+"\" is now in a "+this.condition.ToString()+" state");
-			Debug.Log("Base HP = "+this.BaseHP+", HP = "+this.HP);
 			// clear any pending condition
 			this.pendingCondition = ConditionType.NONE;
 		}
