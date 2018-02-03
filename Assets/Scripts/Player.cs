@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
+using System.Collections;
 
+// TODO: Make the CharacterStats Component Optional?
 [RequireComponent(typeof(Controller2D))]
+[RequireComponent(typeof(CharacterStats))]
 public class Player : MonoBehaviour
 {
 
@@ -41,6 +44,7 @@ public class Player : MonoBehaviour
     float velocityXSmoothing;
 
     Controller2D controller;
+    CharacterStats stats;
 
     Vector2 directionalInput;
     AudioSource objectAudio;
@@ -51,10 +55,24 @@ public class Player : MonoBehaviour
     public Texture2D FarCursor;
     int shotDir; //0 - flat 1 - far
 
+    // variables to determine if what the player is currently able to do
+    bool canMove = true;
+    bool canFire = true;
+
     void Start()
     {
+        // get essential components
         controller = GetComponent<Controller2D>();
+        stats = GetComponent<CharacterStats>();
 
+        // start checking the player stats so we can have the player reflect the condition
+        StartCoroutine("MonitorCondition");
+
+        // set the boolean enablers to default state
+        this.canMove = true;
+        this.canFire = true;
+
+        // calculate limiter variables
         gravity = -(2 * maxJumpHeight) / Mathf.Pow(timeToJumpApex, 2);
         maxJumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
         minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(gravity) * minJumpHeight);
@@ -74,6 +92,7 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        // update movement
         CalculateVelocity();
         HandleWallSliding();
 
@@ -95,20 +114,37 @@ public class Player : MonoBehaviour
             timeToNextFire -= Time.deltaTime;
     }
 
+    public void OnEnable()
+    {
+        StartCoroutine("MonitorCondition");
+    }
+
+    public void OnDisable()
+    {
+        StopCoroutine("MonitorCondition");
+    }
+
     public void Respawn()
     {
+        // remove any current movement variables
         velocity.y = 0;
+        // put the player back at the spawn point
         transform.position = spawnPoint.transform.position;
     }
 
     public void SetDirectionalInput(Vector2 input)
     {
+        if (!this.canMove) return;
         directionalInput = input;
     }
 
     //Inputs
     public void OnJumpInputDown()
     {
+        // just the return if this function is disabled
+        if (!this.canMove) {
+            return;
+        }
         if (wallSliding)
         {
             if (wallDirX == directionalInput.x)
@@ -146,6 +182,10 @@ public class Player : MonoBehaviour
 
     public void OnJumpInputUp()
     {
+        // just the return if this function is disabled
+        if (!this.canMove) {
+            return;
+        }
         if (velocity.y > minJumpVelocity)
         {
             velocity.y = minJumpVelocity;
@@ -154,6 +194,10 @@ public class Player : MonoBehaviour
 
     public void OnMouseButtonDown()
     {
+        // just the return if this function is disabled
+        if (!this.canFire) {
+            return;
+        }
         //Semi-Auto fire only, see MouseButtonHold for full auto
         if (currentShotType == 0)
         {
@@ -204,6 +248,10 @@ public class Player : MonoBehaviour
 
     public void OnMouseButtonHold()
     {
+        // just the return if this function is disabled
+        if (!this.canFire) {
+            return;
+        }
         if (currentShotType == 1 && timeToNextFire <= 0)
         {
             var fireDirection = controller.collisions.faceDir;
@@ -319,5 +367,68 @@ public class Player : MonoBehaviour
         float targetVelocityX = directionalInput.x * moveSpeed;
         velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisions.below) ? accelerationTimeGrounded : accelerationTimeAirborne);
         velocity.y += gravity * Time.deltaTime;
+    }
+
+    // monitor life and death based on the CharacterStats
+    IEnumerator MonitorCondition()
+    {
+        // don't bother monitoring if the CharacterStats component is not set
+        if (!stats) {
+            Debug.Log("The CharacterStats component for this player has not been set yet.");
+            yield break;
+        }
+        // we will assume any conditions have yet been applied when this coroutine started.
+        ConditionType appliedCondition = stats.Condition;
+        // Start looping until the coroutine is manually stopped.
+        while (true) 
+        {
+            // check if they were not yet dead, but they need to be.
+            if (stats.isDead() && appliedCondition != ConditionType.DEAD) {
+                Debug.Log("dieing");
+                // start by making sure the character is dead according to the CharacterStats
+                if (stats && !stats.isDead()) {
+                    stats.kill();
+                }
+                // disable all functionality
+                this.canMove = false;
+                this.canFire = false;
+                // set the new applied condition
+                appliedCondition = stats.Condition;
+                // wait a few seconds before being able to live or die again
+                yield return new WaitForSeconds(2f);
+            // if they aren't dead and they previously were, well... bring um back.
+            } else if (stats.isAlive() && appliedCondition == ConditionType.DEAD) {
+                Debug.Log("reviving");
+                // start by making sure the character is alive according to the CharacterStats
+                if (stats && !stats.isAlive()) {
+                    stats.revive();
+                }
+                // enable all functionality
+                this.canMove = true;
+                this.canFire = true;
+                // set the new applied condition
+                appliedCondition = stats.Condition;
+                // put the player back were they belong
+                this.Respawn();
+                // wait a few seconds before being able to revive again
+                yield return new WaitForSeconds(2f);
+            }
+            // only poll on a set interval, for now every tenth of a second
+            yield return new WaitForSeconds(0.1f);
+        }
+    }
+
+    // passes kill to the CharacterStats object
+    public void kill() {
+        if (this.stats) {
+            this.stats.kill();
+        }
+    }
+
+    // passes kill to the CharacterStats object
+    public void revive() {
+        if (this.stats) {
+            this.stats.revive();
+        }
     }
 }

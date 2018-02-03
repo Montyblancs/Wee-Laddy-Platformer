@@ -75,69 +75,69 @@ public enum ConditionType {NONE, HEALTHY, KNOCKOUT, LIMBO, DEAD};
 [System.Serializable]
 public struct StatValue
 {
-	// The stats core value before any modifiers
-	public float baseValue;
-	// The amount this stat is modified relative to the baseValue
-	public float modifier;
-	// the minimun this stat can be modified to relative to 0. Set to null for unlimited
-	public float? lowerLimit;
-	// the max this stat can be modified to relative to the baseValue. Set to null for unlimited
-	public float? upperLimit;
+    // The stats core value before any modifiers
+    public float baseValue;
+    // The amount this stat is modified relative to the baseValue
+    public float modifier;
+    // the minimun this stat can be modified to relative to 0. Set to null for unlimited
+    public float? lowerLimit;
+    // the max this stat can be modified to relative to the baseValue. Set to null for unlimited
+    public float? upperLimit;
 
-	// generic full constructor
-	public StatValue (float value = 0f, float mod = 0f, float? min = null, float? max = null)
-	{
-		this.baseValue = value;
-		this.modifier = mod;
-		this.lowerLimit = min;
-		this.upperLimit = max;
-	}
-	// conversion from float to StatValue.
-	// EX: StatValue statpoint = 15f; would result in a stat with baseValue of 15f
+    // generic full constructor
+    public StatValue (float value = 0f, float mod = 0f, float? min = null, float? max = null)
+    {
+        this.baseValue = value;
+        this.modifier = mod;
+        this.lowerLimit = min;
+        this.upperLimit = max;
+    }
+    // conversion from float to StatValue.
+    // EX: StatValue statpoint = 15f; would result in a stat with baseValue of 15f
     public static implicit operator StatValue(float value)
     {
         return new StatValue(value);
     }
     // conversion from float to StatValue.
-	// EX: StatValue statpoint = 15D; would result in a stat with baseValue of 15f
+    // EX: StatValue statpoint = 15D; would result in a stat with baseValue of 15f
     public static implicit operator StatValue(double value)
     {
         return new StatValue((float)value);
     }
     // conversion from float to StatValue.
-	// EX: StatValue statpoint = 15; would result in a stat with baseValue of 15f
+    // EX: StatValue statpoint = 15; would result in a stat with baseValue of 15f
     public static implicit operator StatValue(int value)
     {
         return new StatValue((float)value);
     }
     // conversion from StatValue to float.
-	// EX: float statvalue = new StatValue(15f, 1f); would result in 16f
+    // EX: float statvalue = new StatValue(15f, 1f); would result in 16f
     public static implicit operator float(StatValue value)
     {
         return value.baseValue + value.modifier;
     }
     // conversion from StatValue to double.
-	// EX: double statvalue = new StatValue(15f, 1f); would result in 16D
+    // EX: double statvalue = new StatValue(15f, 1f); would result in 16D
     public static implicit operator double(StatValue value)
     {
         return (double)(float)value;
     }
     // conversion from StatValue to int.
-	// EX: int statvalue = new StatValue(15f, 1f); would result in 16
+    // EX: int statvalue = new StatValue(15f, 1f); would result in 16
     public static implicit operator int(StatValue value)
     {
         return (int)Mathf.Round((float)value);
     }
     // conversion from StatValue to string.
-	// EX: string statvalue = new StatValue(15f, 1f); would result in 16.00
+    // EX: string statvalue = new StatValue(15f, 1f); would result in 16.00
     public static implicit operator string(StatValue value)
     {
-    	// output to 2 decimal places
+        // output to 2 decimal places
         return string.Format("{0:N2}", (float)value);
     }
-    public string ToString()
-    {	
-    	return string.Format("{0:N2}", (this.baseValue + this.modifier));
+    public override string ToString()
+    {   
+        return string.Format("{0:N2}", (this.baseValue + this.modifier));
     }
 }
 
@@ -303,10 +303,7 @@ public class CharacterStats : MonoBehaviour {
 		if (this.characterName == "") {
 			this.characterName = "FartFace";
 		}
-		// For now, show thats is working in the debug
-		var allStats = this.getAllStats();
-		this.debugLogStatDictionary(allStats);
-		// TODO: display stats on screen somehow.
+		// TODO: display stats on screen somehow?
 	}
 
 	void OnGUI () {
@@ -478,7 +475,6 @@ public class CharacterStats : MonoBehaviour {
 		}
 		// make sure the value we set don't go beyond upper limit if there is one
 		if (upperLimit != null) {
-			upperLimit = upperLimit;
 			if (value > upperLimit) {
 				newValue = (float)upperLimit;
 			}
