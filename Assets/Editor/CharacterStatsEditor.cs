@@ -54,8 +54,8 @@ public class CharacterStatsEditor : Editor
 		// start with a label for all the stats
 		EditorGUILayout.LabelField("Real", optsCol3);
 		// end header row
-		EditorGUILayout.EndVertical();
 		EditorGUILayout.EndHorizontal();
+		EditorGUILayout.EndVertical();
 
 		// loop through all types of stats
 		foreach(StatType stat in Enum.GetValues(typeof(StatType))) {
@@ -82,8 +82,8 @@ public class CharacterStatsEditor : Editor
 				if (oldFinValue != newFinValue)
 					m_Instance.setStat(stat, newFinValue);
 				// end row
-				EditorGUILayout.EndVertical();
 				EditorGUILayout.EndHorizontal();
+				EditorGUILayout.EndVertical();
 			}
 		}
 	}
