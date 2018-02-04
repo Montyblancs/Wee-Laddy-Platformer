@@ -18,6 +18,8 @@ public class ProjectileController : MonoBehaviour
     AudioSource objectAudio;
     Renderer rend;
 
+    public float damageAmount = 2f;
+
     // Use this for initialization
     void Start()
     {
@@ -84,11 +86,7 @@ public class ProjectileController : MonoBehaviour
 
                 if (wHit)
                 {
-                    AudioClip pickedSound = ricSounds[Random.Range(0, ricSounds.Length)];
-                    objectAudio.panStereo = inView.x;
-                    objectAudio.PlayOneShot(pickedSound, 0.2f);
-                    rend.enabled = false;
-                    Destroy(gameObject, pickedSound.length);
+                    this.hit(wHit);
                 }
 
             }
@@ -140,11 +138,30 @@ public class ProjectileController : MonoBehaviour
         }
     }
 
+    // apply hit effects via a RaycastHit2D
+    void hit(RaycastHit2D rayHit)
+    {
+        Vector3 inView = Camera.main.WorldToViewportPoint(gameObject.transform.position);
+        // make a hit sound
+        AudioClip pickedSound = ricSounds[Random.Range(0, ricSounds.Length)];
+        objectAudio.panStereo = inView.x;
+        objectAudio.PlayOneShot(pickedSound, 0.2f);
+        rend.enabled = false;
+        // check if the thing we hit has stats
+        CharacterStats stats;
+        if (stats = rayHit.collider.gameObject.GetComponent<CharacterStats>()) {
+            // if so we apply damage to the object
+            stats.damage(this.damageAmount);
+        }
+        // remove this game objext
+        Destroy(gameObject, pickedSound.length);
+    }
+
     void OnCollisionEnter2D(Collision2D coll)
     {
         if (coll.gameObject.layer == 8)
         {
-            Debug.Log("hit");
+            Debug.Log("hit layer 8");
         }
     }
 

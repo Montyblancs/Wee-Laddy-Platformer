@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 // TODO: Make the CharacterStats Component Optional?
 [RequireComponent(typeof(Controller2D))]
@@ -55,9 +56,12 @@ public class Player : MonoBehaviour
     public Texture2D FarCursor;
     int shotDir; //0 - flat 1 - far
 
-    // variables to determine if what the player is currently able to do
-    bool canMove = true;
-    bool canFire = true;
+    // variables to determine what the player is currently able to do
+    public bool canMove = true;
+    public bool canFire = true;
+
+    // holds a list of all active coroutines started by this object
+    private List<string> activeCoroutines = new List<string> {};
 
     void Start()
     {
@@ -65,12 +69,12 @@ public class Player : MonoBehaviour
         controller = GetComponent<Controller2D>();
         stats = GetComponent<CharacterStats>();
 
-        // start checking the player stats so we can have the player reflect the condition
-        StartCoroutine("MonitorCondition");
-
         // set the boolean enablers to default state
         this.canMove = true;
         this.canFire = true;
+
+        // start checking the player stats so we can have the player reflect the condition
+        StartCoroutine("MonitorCondition");
 
         // calculate limiter variables
         gravity = -(2 * maxJumpHeight) / Mathf.Pow(timeToJumpApex, 2);
@@ -116,12 +120,21 @@ public class Player : MonoBehaviour
 
     public void OnEnable()
     {
-        StartCoroutine("MonitorCondition");
+        // start the ConditionMonitor Coroutine if its not already started.
+        if (!this.activeCoroutines.Contains("MonitorCondition")) {
+            // if stats component has not been fetched, don't bother.
+            if (stats) {
+                StartCoroutine("MonitorCondition");
+            }
+        }
     }
 
     public void OnDisable()
     {
+        // make sure to stop monitoring conditio
         StopCoroutine("MonitorCondition");
+        // remove the coroutine from the list.
+        this.activeCoroutines.Remove("MonitorCondition");
     }
 
     public void Respawn()
@@ -377,6 +390,8 @@ public class Player : MonoBehaviour
             Debug.Log("The CharacterStats component for this player has not been set yet.");
             yield break;
         }
+        // Add this coroutine to the list of active Coroutines
+        this.activeCoroutines.Add("MonitorCondition");
         // we will assume any conditions have yet been applied when this coroutine started.
         ConditionType appliedCondition = stats.Condition;
         // Start looping until the coroutine is manually stopped.
@@ -384,7 +399,6 @@ public class Player : MonoBehaviour
         {
             // check if they were not yet dead, but they need to be.
             if (stats.isDead() && appliedCondition != ConditionType.DEAD) {
-                Debug.Log("dieing");
                 // start by making sure the character is dead according to the CharacterStats
                 if (stats && !stats.isDead()) {
                     stats.kill();
@@ -398,7 +412,6 @@ public class Player : MonoBehaviour
                 yield return new WaitForSeconds(2f);
             // if they aren't dead and they previously were, well... bring um back.
             } else if (stats.isAlive() && appliedCondition == ConditionType.DEAD) {
-                Debug.Log("reviving");
                 // start by making sure the character is alive according to the CharacterStats
                 if (stats && !stats.isAlive()) {
                     stats.revive();
@@ -416,16 +429,19 @@ public class Player : MonoBehaviour
             // only poll on a set interval, for now every tenth of a second
             yield return new WaitForSeconds(0.1f);
         }
+        // the code shouldn't reach this, but in case it does
+        // remove this coroutine from the list of active coroutines.
+        this.activeCoroutines.Remove("MonitorCondition");
     }
 
-    // passes kill to the CharacterStats object
+    // passes kill to the CharacterStats component
     public void kill() {
         if (this.stats) {
             this.stats.kill();
         }
     }
 
-    // passes kill to the CharacterStats object
+    // passes revive to the CharacterStats component
     public void revive() {
         if (this.stats) {
             this.stats.revive();
