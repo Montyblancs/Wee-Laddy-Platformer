@@ -1,0 +1,19 @@
+{
+	"folders":
+	[
+		{
+			"name": "Other",
+			"path": "Assets/",
+			"folder_exclude_patterns": ["*"],
+			"file_exclude_patterns": ["*.meta"]
+		},
+		{
+			"path": "Assets/Scripts",
+			"file_exclude_patterns": ["*.cs.meta"]
+		},
+		{
+			"path": "Assets/Editor",
+			"file_exclude_patterns": ["*.cs.meta"]
+		}
+	]
+}

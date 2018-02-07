@@ -1,0 +1,14 @@
+Damage player when running into enemy
+Develop more weapons/pickups for the player
+  -Make bullet casings slightly more dynamic
+Make a HUD
+Give player a dodge button with iFrames (both bullets and enemy collision immune)
+Make a far enemy that shoots from and moves around on background platforms
+Make a flying enemy
+Make an enemy that can take multiple hits
+Make a multi-part boss enemy (like a robot with a bunch of limbs)
+Refine camera movements and control, where possible.
+Zoom out the camera a bit, let the player see more.
+
+-Future Ideas
+Give each weapon a "super move" meter, which stops time briefly, gives iframes, and performs a charged up attack based on weapon fire type.
