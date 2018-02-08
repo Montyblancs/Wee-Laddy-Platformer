@@ -62,7 +62,7 @@ public class Player : MonoBehaviour
     public bool canFire = true;
 
     // holds a list of all active coroutines started by this object
-    private List<string> activeCoroutines = new List<string> {};
+    private List<string> activeCoroutines = new List<string> { };
 
     void Start()
     {
@@ -115,16 +115,18 @@ public class Player : MonoBehaviour
             }
         }
 
-        if(timeToNextFire > 0)
+        if (timeToNextFire > 0)
             timeToNextFire -= Time.deltaTime;
     }
 
     public void OnEnable()
     {
         // start the ConditionMonitor Coroutine if its not already started.
-        if (!this.activeCoroutines.Contains("MonitorCondition")) {
+        if (!this.activeCoroutines.Contains("MonitorCondition"))
+        {
             // if stats component has not been fetched, don't bother.
-            if (stats) {
+            if (stats)
+            {
                 StartCoroutine("MonitorCondition");
             }
         }
@@ -156,7 +158,8 @@ public class Player : MonoBehaviour
     public void OnJumpInputDown()
     {
         // just the return if this function is disabled
-        if (!this.canMove) {
+        if (!this.canMove)
+        {
             return;
         }
         if (wallSliding)
@@ -197,7 +200,8 @@ public class Player : MonoBehaviour
     public void OnJumpInputUp()
     {
         // just the return if this function is disabled
-        if (!this.canMove) {
+        if (!this.canMove)
+        {
             return;
         }
         if (velocity.y > minJumpVelocity)
@@ -209,11 +213,12 @@ public class Player : MonoBehaviour
     public void OnMouseButtonDown()
     {
         // just the return if this function is disabled
-        if (!this.canFire) {
+        if (!this.canFire)
+        {
             return;
         }
         //Semi-Auto fire only, see MouseButtonHold for full auto
-        if (currentShotType == 0)
+        if ((currentShotType == 0 || currentShotType == 2) && timeToNextFire <= 0)
         {
             var fireDirection = controller.collisions.faceDir;
             //Determine if player is wall sliding, don't allow fire inside of wall
@@ -222,37 +227,128 @@ public class Player : MonoBehaviour
                 fireDirection = fireDirection * -1;
             }
 
-            //Create a projectile that travels towards the current position of the mouse cursor.
-            //gameObject refers to the parent object of this script
-            GameObject thisProjectile = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
-            if (shotDir == 1)
+            if (currentShotType == 0)
             {
-                thisProjectile.transform.parent = farBulletParentContainer.transform;
-            }
-            else
-            {
-                thisProjectile.transform.parent = nearBulletParentContainer.transform;
-            }
-            ProjectileController projectileScript = thisProjectile.GetComponent<ProjectileController>();
-            projectileScript.casingContainer = casingContainer;
-            projectileScript.CreateCasing(new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5));
+                //Create a projectile that travels towards the current position of the mouse cursor.
+                //gameObject refers to the parent object of this script
+                GameObject thisProjectile = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
+                if (shotDir == 1)
+                {
+                    thisProjectile.transform.parent = farBulletParentContainer.transform;
+                }
+                else
+                {
+                    thisProjectile.transform.parent = nearBulletParentContainer.transform;
+                }
+                ProjectileController projectileScript = thisProjectile.GetComponent<ProjectileController>();
+                projectileScript.casingContainer = casingContainer;
+                projectileScript.CreateCasing(new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5));
 
-            //Mouse position is not equal to position in game world, just the position on the screen.
-            //Need game world equivilent position for this coord.
-            Vector3 shotTarget = Input.mousePosition;
-            if (shotDir == 0)
-            {
-                shotTarget.z = 10;
-            }
-            else
-            {
-                shotTarget.z = 21;
-            }
+                //Mouse position is not equal to position in game world, just the position on the screen.
+                //Need game world equivilent position for this coord.
+                Vector3 shotTarget = Input.mousePosition;
+                if (shotDir == 0)
+                {
+                    shotTarget.z = 10;
+                }
+                else
+                {
+                    shotTarget.z = 21;
+                }
 
-            projectileScript.targetCoords = playerCam.ScreenToWorldPoint(shotTarget);
+                projectileScript.targetCoords = playerCam.ScreenToWorldPoint(shotTarget);
+            }
+            else if (currentShotType == 2)
+            {
+                //Create a projectile that travels towards the current position of the mouse cursor.
+                //gameObject refers to the parent object of this script
+                GameObject p1 = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
+                GameObject p2 = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
+                GameObject p3 = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
+                GameObject p4 = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
+                GameObject p5 = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
+                //Make a list so I don't have to repeat these fuckin' lines 5 times
+                List<GameObject> theseBullets = new List<GameObject>
+                {
+                    p1,
+                    p2,
+                    p3,
+                    p4,
+                    p5
+                };
+                if (shotDir == 1)
+                {
+                    foreach (GameObject TB in theseBullets)
+                    {
+                        TB.transform.parent = farBulletParentContainer.transform;
+                    }
+                }
+                else
+                {
+                    foreach (GameObject TB in theseBullets)
+                    {
+                        TB.transform.parent = nearBulletParentContainer.transform;
+                    }
+                }
+                List<ProjectileController> theseScripts = new List<ProjectileController>();
+                foreach (GameObject TB in theseBullets)
+                {
+                    ProjectileController temp = TB.GetComponent<ProjectileController>();
+                    theseScripts.Add(temp);
+                }
+                theseScripts[0].casingContainer = casingContainer;
+                theseScripts[0].CreateCasing(new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5));
+
+                //Mouse position is not equal to position in game world, just the position on the screen.
+                //Need game world equivilent position for this coord.
+                Vector3 shotTarget = Input.mousePosition;
+                if (shotDir == 0)
+                {
+                    shotTarget.z = 10;
+
+                    //Spread pattern
+                    List<Vector3> alteredTargets = new List<Vector3>
+                    {
+                    new Vector3(shotTarget.x, shotTarget.y, shotTarget.z),
+                    new Vector3(shotTarget.x - 21f, shotTarget.y - 21f, shotTarget.z),
+                    new Vector3(shotTarget.x - 30f, shotTarget.y - 30f, shotTarget.z),
+                    new Vector3(shotTarget.x + 21f, shotTarget.y + 21f, shotTarget.z),
+                    new Vector3(shotTarget.x + 30f, shotTarget.y + 30f, shotTarget.z)
+                    };
+
+                    var shotIndex = 0;
+                    foreach (ProjectileController TS in theseScripts)
+                    {
+                        TS.targetCoords = playerCam.ScreenToWorldPoint(alteredTargets[shotIndex]);
+                        shotIndex++;
+                    }
+                }
+                else
+                {
+                    shotTarget.z = 21;
+
+                    //+ Pattern
+                    List<Vector3> alteredTargets = new List<Vector3>
+                    {
+                    new Vector3(shotTarget.x, shotTarget.y, shotTarget.z),
+                    new Vector3(shotTarget.x + 10f, shotTarget.y, shotTarget.z),
+                    new Vector3(shotTarget.x - 10f, shotTarget.y, shotTarget.z),
+                    new Vector3(shotTarget.x, shotTarget.y + 10f, shotTarget.z),
+                    new Vector3(shotTarget.x, shotTarget.y - 10f, shotTarget.z)
+                    };
+
+                    var shotIndex = 0;
+                    foreach (ProjectileController TS in theseScripts)
+                    {
+                        TS.targetCoords = playerCam.ScreenToWorldPoint(alteredTargets[shotIndex]);
+                        shotIndex++;
+                    }
+                }
+            }
 
             objectAudio.PlayOneShot(shotSound, 0.3f);
 
+            timeToNextFire = specialFireRate;
             if (specialRoundsLeft != -1)
                 specialRoundsLeft--;
 
@@ -265,7 +361,8 @@ public class Player : MonoBehaviour
     public void OnMouseButtonHold()
     {
         // just the return if this function is disabled
-        if (!this.canFire) {
+        if (!this.canFire)
+        {
             return;
         }
         if (currentShotType == 1 && timeToNextFire <= 0)
@@ -391,7 +488,8 @@ public class Player : MonoBehaviour
     IEnumerator MonitorCondition()
     {
         // don't bother monitoring if the CharacterStats component is not set
-        if (!stats) {
+        if (!stats)
+        {
             Debug.Log("The CharacterStats component for this player has not been set yet.");
             yield break;
         }
@@ -400,12 +498,14 @@ public class Player : MonoBehaviour
         // we will assume any conditions have yet been applied when this coroutine started.
         ConditionType appliedCondition = stats.Condition;
         // Start looping until the coroutine is manually stopped.
-        while (true) 
+        while (true)
         {
             // check if they were not yet dead, but they need to be.
-            if (stats.isDead() && appliedCondition != ConditionType.DEAD) {
+            if (stats.isDead() && appliedCondition != ConditionType.DEAD)
+            {
                 // start by making sure the character is dead according to the CharacterStats
-                if (stats && !stats.isDead()) {
+                if (stats && !stats.isDead())
+                {
                     stats.kill();
                 }
                 // disable all functionality
@@ -415,10 +515,13 @@ public class Player : MonoBehaviour
                 appliedCondition = stats.Condition;
                 // wait a few seconds before being able to live or die again
                 yield return new WaitForSeconds(2f);
-            // if they aren't dead and they previously were, well... bring um back.
-            } else if (stats.isAlive() && appliedCondition == ConditionType.DEAD) {
+                // if they aren't dead and they previously were, well... bring um back.
+            }
+            else if (stats.isAlive() && appliedCondition == ConditionType.DEAD)
+            {
                 // start by making sure the character is alive according to the CharacterStats
-                if (stats && !stats.isAlive()) {
+                if (stats && !stats.isAlive())
+                {
                     stats.revive();
                 }
                 // enable all functionality
@@ -441,15 +544,19 @@ public class Player : MonoBehaviour
     }
 
     // passes kill to the CharacterStats component
-    public void kill() {
-        if (this.stats) {
+    public void kill()
+    {
+        if (this.stats)
+        {
             this.stats.kill();
         }
     }
 
     // passes revive to the CharacterStats component
-    public void revive() {
-        if (this.stats) {
+    public void revive()
+    {
+        if (this.stats)
+        {
             this.stats.revive();
         }
     }

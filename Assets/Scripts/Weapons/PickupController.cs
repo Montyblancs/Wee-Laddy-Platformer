@@ -8,6 +8,7 @@ public class PickupController : MonoBehaviour {
     //Fire Type Codes:
     //0 - Semi-Auto (Once on mouse button down)
     //1 - Full-Auto (Constant while mouse button down)
+    //2 - Shotgun (Once on down, has fire delay)
     public short fireType;
     public float fireRate;
 
