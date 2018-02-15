@@ -22,6 +22,15 @@ public class Player : MonoBehaviour
     public float wallSlideSpeedMax = 3;
     public float wallStickTime = .25f;
 
+    public int dodgeLayer;
+    public int playerLayer;
+    public float dodgeCooldown = 3f;
+    public Material dodgeMaterial;
+    public Material baseMaterial;
+    public float dodgeDuration = 0.2f;
+    float dodgeInputTimer = 0f;
+    float dodgeTimer = 0f;
+
     public GameObject farBulletParentContainer;
     public GameObject nearBulletParentContainer;
     public GameObject casingContainer;
@@ -47,6 +56,7 @@ public class Player : MonoBehaviour
 
     Controller2D controller;
     CharacterStats stats;
+    Renderer render;
 
     Vector2 directionalInput;
     AudioSource objectAudio;
@@ -69,6 +79,7 @@ public class Player : MonoBehaviour
         // get essential components
         controller = GetComponent<Controller2D>();
         stats = GetComponent<CharacterStats>();
+        render = GetComponent<Renderer>();
 
         // set the boolean enablers to default state
         this.canMove = true;
@@ -117,6 +128,12 @@ public class Player : MonoBehaviour
 
         if (timeToNextFire > 0)
             timeToNextFire -= Time.deltaTime;
+        if (dodgeInputTimer > 0)
+            dodgeInputTimer -= Time.deltaTime;
+        if (dodgeTimer > 0)
+            dodgeTimer -= Time.deltaTime;
+        else if (controller.isDodging && dodgeTimer <= 0)
+            ResetDodgeFlag();
     }
 
     public void OnEnable()
@@ -427,6 +444,36 @@ public class Player : MonoBehaviour
             Cursor.SetCursor(FlatCursor, new Vector2(FlatCursor.width / 2, FlatCursor.height / 2), CursorMode.Auto);
             shotDir = 0;
         }
+    }
+
+    public void OnDodgeRoll()
+    {
+        if (dodgeInputTimer <= 0 && !controller.isDodging)
+        {
+            //if (controller.collisions.slidingDownMaxSlope)
+            //{
+            //    if (directionalInput.x != -Mathf.Sign(controller.collisions.slopeNormal.x))
+            //    { // not jumping against max slope
+            //        velocity.y = maxJumpVelocity * controller.collisions.slopeNormal.y;
+            //        velocity.x = maxJumpVelocity * controller.collisions.slopeNormal.x;
+            //    }
+            //}
+            //else
+            //{
+            controller.isDodging = true;
+            gameObject.layer = dodgeLayer;
+            render.material = dodgeMaterial;
+            dodgeTimer = dodgeDuration;
+            dodgeInputTimer = dodgeCooldown;
+            //}
+        }
+    }
+
+    private void ResetDodgeFlag()
+    {
+        controller.isDodging = false;
+        gameObject.layer = playerLayer;
+        render.material = baseMaterial;
     }
 
     //Weapons

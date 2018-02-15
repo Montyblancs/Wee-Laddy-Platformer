@@ -8,12 +8,15 @@ public class Controller2D : RaycastController
     public CollisionInfo collisions;
     [HideInInspector]
     public Vector2 playerInput;
+    public bool isDodging;
+    public float dodgeDuration = .2f;
+    //float moveSpeed = 6;
 
     public override void Start()
     {
         base.Start();
         collisions.faceDir = 1;
-
+        isDodging = false;
     }
 
     public void Move(Vector2 moveAmount, bool standingOnPlatform)
@@ -23,6 +26,10 @@ public class Controller2D : RaycastController
 
     public void Move(Vector2 moveAmount, Vector2 input, bool standingOnPlatform = false)
     {
+        if (isDodging)
+        {
+            moveAmount.x = 0.5f * collisions.faceDir;
+        }
         UpdateRaycastOrigins();
 
         collisions.Reset();

@@ -43,6 +43,12 @@ public class PlayerInput : MonoBehaviour
             player.OnPlaneChange();
         }
 
+        //Dodge Roll
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            player.OnDodgeRoll();
+        }
+
         if (Application.isEditor && Input.GetKeyDown(KeyCode.Backspace))
         {
             //Reload scene for debug purposes
