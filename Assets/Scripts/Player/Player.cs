@@ -540,7 +540,7 @@ public class Player : MonoBehaviour
         // if its close enough, make it target value, cause for some reason transitionTime doesn't do that.
         if (Mathf.Abs(accelerationX) < 0.001F) {
             accelerationX = 0F;
-            velocity.x = 0F;
+            velocity.x = targetVelocityX;
         }
         velocity.y += gravity * Time.deltaTime;
     }

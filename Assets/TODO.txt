@@ -1,4 +1,3 @@
-fix bug where the player appears to vertically jitter ever so slightly on while moving on platforms.
 Damage player when running into enemy
 Develop more weapons/pickups for the player
   -Make bullet casings slightly more dynamic
@@ -10,6 +9,7 @@ Make an enemy that can take multiple hits
 Make a multi-part boss enemy (like a robot with a bunch of limbs)
 Refine camera movements and control, where possible.
 Zoom out the camera a bit, let the player see more.
+fix bug where the player appears to jitter ever so slightly while moving on platforms.
 
 -Future Ideas
 Give each weapon a "super move" meter, which stops time briefly, gives iframes, and performs a charged up attack based on weapon fire type.
