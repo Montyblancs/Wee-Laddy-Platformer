@@ -11,9 +11,23 @@ public class Player : MonoBehaviour
     public float maxJumpHeight = 4;
     public float minJumpHeight = 1;
     public float timeToJumpApex = .4f;
-    float accelerationTimeAirborne = .2f;
-    float accelerationTimeGrounded = .1f;
-    float moveSpeed = 6;
+    private float accelerationTimeAirborne = .2f;
+    private float accelerationTimeGrounded = .1f;
+    // move speed is dependant on the SPD stat of the character stats script, so the value set here is more of a default.
+    private float moveSpeed = 6;
+    // for convenience sake, use the property below to change character speed, or you can modify stats.SPD
+    public float MoveSpeed
+    {
+        get { return (stats ? stats.SPD : moveSpeed); }
+        set {
+            // if characterstats is fetched, set the stat.
+            if (stats) {
+                stats.SPD = value;
+            } else {
+                this.moveSpeed = value;
+            }
+        }
+    }
 
     public Vector2 wallJumpClimb;
     public Vector2 wallJumpOff;
@@ -52,7 +66,7 @@ public class Player : MonoBehaviour
     float maxJumpVelocity;
     float minJumpVelocity;
     public Vector3 velocity;
-    float velocityXSmoothing;
+    private float accelerationX = 0f;
 
     Controller2D controller;
     CharacterStats stats;
@@ -167,18 +181,15 @@ public class Player : MonoBehaviour
 
     public void SetDirectionalInput(Vector2 input)
     {
-        if (!this.canMove) return;
-        directionalInput = input;
+        directionalInput = (!this.canMove) ? Vector2.zero : input;
     }
 
     //Inputs
     public void OnJumpInputDown()
     {
         // just the return if this function is disabled
-        if (!this.canMove)
-        {
-            return;
-        }
+        if (!this.canMove) return;
+        // if this player is wallsliding, do a few special things.
         if (wallSliding)
         {
             if (wallDirX == directionalInput.x)
@@ -216,11 +227,8 @@ public class Player : MonoBehaviour
 
     public void OnJumpInputUp()
     {
-        // just the return if this function is disabled
-        if (!this.canMove)
-        {
-            return;
-        }
+        // just the return if this movement functionality is disabled
+        if (!this.canMove) return;
         if (velocity.y > minJumpVelocity)
         {
             velocity.y = minJumpVelocity;
@@ -230,10 +238,7 @@ public class Player : MonoBehaviour
     public void OnMouseButtonDown()
     {
         // just the return if this function is disabled
-        if (!this.canFire)
-        {
-            return;
-        }
+        if (!this.canFire) return;
         //Semi-Auto fire only, see MouseButtonHold for full auto
         if ((currentShotType == 0 || currentShotType == 2) && timeToNextFire <= 0)
         {
@@ -378,10 +383,7 @@ public class Player : MonoBehaviour
     public void OnMouseButtonHold()
     {
         // just the return if this function is disabled
-        if (!this.canFire)
-        {
-            return;
-        }
+        if (!this.canFire) return;
         if (currentShotType == 1 && timeToNextFire <= 0)
         {
             var fireDirection = controller.collisions.faceDir;
@@ -490,20 +492,26 @@ public class Player : MonoBehaviour
     //Movement
     void HandleWallSliding()
     {
+        // get the direction the wall is in
         wallDirX = (controller.collisions.left) ? -1 : 1;
+        // check if directional input is "away" from the wall
+        bool inputAway = (directionalInput.x != wallDirX && directionalInput.x != 0) ? true : false;
+        // check if we are wall sliding
         wallSliding = false;
-        if ((controller.collisions.left || controller.collisions.right) && !controller.collisions.below && velocity.y < 0)
+        if (!inputAway && (controller.collisions.left || controller.collisions.right) && !controller.collisions.below && velocity.y < 0)
         {
             wallSliding = true;
 
+            // limit slide speed
             if (velocity.y < -wallSlideSpeedMax)
             {
                 velocity.y = -wallSlideSpeedMax;
             }
 
+            // ... wtf is this timeToWallUnstick supposed to to? is this incomplete code? This logic will mean its just always ticking down to 0, then reset?
             if (timeToWallUnstick > 0)
             {
-                velocityXSmoothing = 0;
+                accelerationX = 0;
                 velocity.x = 0;
 
                 if (directionalInput.x != wallDirX && directionalInput.x != 0)
@@ -527,7 +535,13 @@ public class Player : MonoBehaviour
     void CalculateVelocity()
     {
         float targetVelocityX = directionalInput.x * moveSpeed;
-        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisions.below) ? accelerationTimeGrounded : accelerationTimeAirborne);
+        float transitionTime = (controller.collisions.below) ? accelerationTimeGrounded : accelerationTimeAirborne;
+        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref accelerationX, transitionTime);
+        // if its close enough, make it target value, cause for some reason transitionTime doesn't do that.
+        if (Mathf.Abs(accelerationX) < 0.001F) {
+            accelerationX = 0F;
+            velocity.x = targetVelocityX;
+        }
         velocity.y += gravity * Time.deltaTime;
     }
 
@@ -562,10 +576,8 @@ public class Player : MonoBehaviour
                 appliedCondition = stats.Condition;
                 // wait a few seconds before being able to live or die again
                 yield return new WaitForSeconds(2f);
-                // if they aren't dead and they previously were, well... bring um back.
-            }
-            else if (stats.isAlive() && appliedCondition == ConditionType.DEAD)
-            {
+            // if they aren't dead and they previously were, well... bring um back.
+            } else if (stats.isAlive() && appliedCondition == ConditionType.DEAD) {
                 // start by making sure the character is alive according to the CharacterStats
                 if (stats && !stats.isAlive())
                 {
@@ -581,12 +593,14 @@ public class Player : MonoBehaviour
                 // wait a few seconds before being able to revive again
                 yield return new WaitForSeconds(2f);
             }
+            // Make player speed reflect the speed stat
+            if (this.moveSpeed != stats.SPD) {
+                this.moveSpeed = stats.SPD;
+            }
             // only poll on a set interval, for now every tenth of a second
             yield return new WaitForSeconds(0.1f);
         }
-        // the code shouldn't reach this, but in case it does
-        // remove this coroutine from the list of active coroutines.
-        // --VS reports this line is unreachable, which is accurate. Not needed. -S
+        // NOTE: whenever this coroutine is stopped, we should remove it from the coroutine list like below:
         // this.activeCoroutines.Remove("MonitorCondition");
     }
 
