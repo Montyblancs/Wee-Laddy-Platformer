@@ -11,8 +11,8 @@ public class Player : MonoBehaviour
     public float maxJumpHeight = 4;
     public float minJumpHeight = 1;
     public float timeToJumpApex = .4f;
-    float accelerationTimeAirborne = .2f;
-    float accelerationTimeGrounded = .1f;
+    private float accelerationTimeAirborne = .2f;
+    private float accelerationTimeGrounded = .1f;
     // move speed is dependant on the SPD stat of the character stats script, so the value set here is more of a default.
     private float moveSpeed = 6;
     // for convenience sake, use the property below to change character speed, or you can modify stats.SPD
@@ -66,7 +66,7 @@ public class Player : MonoBehaviour
     float maxJumpVelocity;
     float minJumpVelocity;
     public Vector3 velocity;
-    float velocityXSmoothing;
+    private float accelerationX = 0f;
 
     Controller2D controller;
     CharacterStats stats;
@@ -181,9 +181,7 @@ public class Player : MonoBehaviour
 
     public void SetDirectionalInput(Vector2 input)
     {
-        // just the return if this function is disabled
-        if (!this.canMove) return;
-        directionalInput = input;
+        directionalInput = (!this.canMove) ? Vector2.zero : input;
     }
 
     //Inputs
@@ -513,7 +511,7 @@ public class Player : MonoBehaviour
             // ... wtf is this timeToWallUnstick supposed to to? is this incomplete code? This logic will mean its just always ticking down to 0, then reset?
             if (timeToWallUnstick > 0)
             {
-                velocityXSmoothing = 0;
+                accelerationX = 0;
                 velocity.x = 0;
 
                 if (directionalInput.x != wallDirX && directionalInput.x != 0)
@@ -537,7 +535,13 @@ public class Player : MonoBehaviour
     void CalculateVelocity()
     {
         float targetVelocityX = directionalInput.x * moveSpeed;
-        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisions.below) ? accelerationTimeGrounded : accelerationTimeAirborne);
+        float transitionTime = (controller.collisions.below) ? accelerationTimeGrounded : accelerationTimeAirborne;
+        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref accelerationX, transitionTime);
+        // if its close enough, make it target value, cause for some reason transitionTime doesn't do that.
+        if (Mathf.Abs(accelerationX) < 0.001F) {
+            accelerationX = 0F;
+            velocity.x = 0F;
+        }
         velocity.y += gravity * Time.deltaTime;
     }
 
