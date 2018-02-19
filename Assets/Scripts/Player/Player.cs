@@ -181,6 +181,7 @@ public class Player : MonoBehaviour
 
     public void SetDirectionalInput(Vector2 input)
     {
+        // just the return if this function is disabled
         if (!this.canMove) return;
         directionalInput = input;
     }
@@ -189,10 +190,8 @@ public class Player : MonoBehaviour
     public void OnJumpInputDown()
     {
         // just the return if this function is disabled
-        if (!this.canMove)
-        {
-            return;
-        }
+        if (!this.canMove) return;
+        // if this player is wallsliding, do a few special things.
         if (wallSliding)
         {
             if (wallDirX == directionalInput.x)
@@ -230,11 +229,8 @@ public class Player : MonoBehaviour
 
     public void OnJumpInputUp()
     {
-        // just the return if this function is disabled
-        if (!this.canMove)
-        {
-            return;
-        }
+        // just the return if this movement functionality is disabled
+        if (!this.canMove) return;
         if (velocity.y > minJumpVelocity)
         {
             velocity.y = minJumpVelocity;
@@ -244,10 +240,7 @@ public class Player : MonoBehaviour
     public void OnMouseButtonDown()
     {
         // just the return if this function is disabled
-        if (!this.canFire)
-        {
-            return;
-        }
+        if (!this.canFire) return;
         //Semi-Auto fire only, see MouseButtonHold for full auto
         if ((currentShotType == 0 || currentShotType == 2) && timeToNextFire <= 0)
         {
@@ -392,10 +385,7 @@ public class Player : MonoBehaviour
     public void OnMouseButtonHold()
     {
         // just the return if this function is disabled
-        if (!this.canFire)
-        {
-            return;
-        }
+        if (!this.canFire) return;
         if (currentShotType == 1 && timeToNextFire <= 0)
         {
             var fireDirection = controller.collisions.faceDir;
@@ -504,17 +494,23 @@ public class Player : MonoBehaviour
     //Movement
     void HandleWallSliding()
     {
+        // get the direction the wall is in
         wallDirX = (controller.collisions.left) ? -1 : 1;
+        // check if directional input is "away" from the wall
+        bool inputAway = (directionalInput.x != wallDirX && directionalInput.x != 0) ? true : false;
+        // check if we are wall sliding
         wallSliding = false;
-        if ((controller.collisions.left || controller.collisions.right) && !controller.collisions.below && velocity.y < 0)
+        if (!inputAway && (controller.collisions.left || controller.collisions.right) && !controller.collisions.below && velocity.y < 0)
         {
             wallSliding = true;
 
+            // limit slide speed
             if (velocity.y < -wallSlideSpeedMax)
             {
                 velocity.y = -wallSlideSpeedMax;
             }
 
+            // ... wtf is this timeToWallUnstick supposed to to? is this incomplete code? This logic will mean its just always ticking down to 0, then reset?
             if (timeToWallUnstick > 0)
             {
                 velocityXSmoothing = 0;
