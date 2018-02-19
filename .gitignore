@@ -53,6 +53,7 @@ Temporary Items
 # From GitHubs's Unity.gitignore
 # =========================
 [Ll]ibrary/
+Library/
 [Tt]emp/
 [Oo]bj/
 [Bb]uild/
