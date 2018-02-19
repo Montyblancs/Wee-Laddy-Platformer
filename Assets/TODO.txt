@@ -1,3 +1,4 @@
+fix bug where velocity.x in player script goes to random values after movement.
 Damage player when running into enemy
 Develop more weapons/pickups for the player
   -Make bullet casings slightly more dynamic
