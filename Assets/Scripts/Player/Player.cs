@@ -13,7 +13,21 @@ public class Player : MonoBehaviour
     public float timeToJumpApex = .4f;
     float accelerationTimeAirborne = .2f;
     float accelerationTimeGrounded = .1f;
-    float moveSpeed = 6;
+    // move speed is dependant on the SPD stat of the character stats script, so the value set here is more of a default.
+    private float moveSpeed = 6;
+    // for convenience sake, use the property below to change character speed, or you can modify stats.SPD
+    public float MoveSpeed
+    {
+        get { return (stats ? stats.SPD : moveSpeed); }
+        set {
+            // if characterstats is fetched, set the stat.
+            if (stats) {
+                stats.SPD = value;
+            } else {
+                this.moveSpeed = value;
+            }
+        }
+    }
 
     public Vector2 wallJumpClimb;
     public Vector2 wallJumpOff;
@@ -562,10 +576,8 @@ public class Player : MonoBehaviour
                 appliedCondition = stats.Condition;
                 // wait a few seconds before being able to live or die again
                 yield return new WaitForSeconds(2f);
-                // if they aren't dead and they previously were, well... bring um back.
-            }
-            else if (stats.isAlive() && appliedCondition == ConditionType.DEAD)
-            {
+            // if they aren't dead and they previously were, well... bring um back.
+            } else if (stats.isAlive() && appliedCondition == ConditionType.DEAD) {
                 // start by making sure the character is alive according to the CharacterStats
                 if (stats && !stats.isAlive())
                 {
@@ -581,12 +593,14 @@ public class Player : MonoBehaviour
                 // wait a few seconds before being able to revive again
                 yield return new WaitForSeconds(2f);
             }
+            // Make player speed reflect the speed stat
+            if (this.moveSpeed != stats.SPD) {
+                this.moveSpeed = stats.SPD;
+            }
             // only poll on a set interval, for now every tenth of a second
             yield return new WaitForSeconds(0.1f);
         }
-        // the code shouldn't reach this, but in case it does
-        // remove this coroutine from the list of active coroutines.
-        // --VS reports this line is unreachable, which is accurate. Not needed. -S
+        // NOTE: whenever this coroutine is stopped, we should remove it from the coroutine list like below:
         // this.activeCoroutines.Remove("MonitorCondition");
     }
 
