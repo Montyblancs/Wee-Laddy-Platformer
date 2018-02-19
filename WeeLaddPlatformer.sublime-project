@@ -2,6 +2,11 @@
 	"folders":
 	[
 		{
+			"name": ".git/info",
+			"path": ".git/info",
+			"file_exclude_patterns": ["*.meta"]
+		},
+		{
 			"name": "Other",
 			"path": "Assets/",
 			"folder_exclude_patterns": ["*"],
