@@ -15,6 +15,7 @@ public class Enemy : MonoBehaviour
     public GameObject projectileType;
     public GameObject enemyNearBulletParentContainer;
     public Camera mainCam;
+    public float damageOnTouch;
 
     float timeToNextFire;
     //float timeToWallUnstick;
@@ -31,6 +32,9 @@ public class Enemy : MonoBehaviour
     float velocityXSmoothing;
 
     EnemyController2D controller;
+
+    BoxCollider2D thisCollider;
+    BoxCollider2D playerCollider;
 
     Vector2 directionalInput;
     //bool wallSliding;
@@ -55,6 +59,9 @@ public class Enemy : MonoBehaviour
 
         timeToNextFire = shootDelay;
         objectAudio = GetComponent<AudioSource>();
+
+        thisCollider = GetComponent<BoxCollider2D>();
+        playerCollider = targetToChase.GetComponent<BoxCollider2D>();
     }
 
     void Update()
@@ -75,6 +82,16 @@ public class Enemy : MonoBehaviour
                 else if (Vector3.Distance(targetToChase.transform.position, gameObject.transform.position) <= 4f)
                 {
                     TowardsPlayer.x = 1f;
+                    //Check if player is touching
+                    if (thisCollider.bounds.Intersects(playerCollider.bounds))
+                    {
+                        CharacterStats stats;
+                        if (stats = targetToChase.GetComponent<CharacterStats>())
+                        {
+                            //Needs invuln state
+                            stats.damage(damageOnTouch);
+                        }
+                    }
                 }
             }
             else if (targetToChase.transform.position.x >= gameObject.transform.position.x)
@@ -86,6 +103,16 @@ public class Enemy : MonoBehaviour
                 else if (Vector3.Distance(targetToChase.transform.position, gameObject.transform.position) <= 4f)
                 {
                     TowardsPlayer.x = -1f;
+                    //Check if player is touching
+                    if (thisCollider.bounds.Intersects(playerCollider.bounds))
+                    {
+                        CharacterStats stats;
+                        if (stats = targetToChase.GetComponent<CharacterStats>())
+                        {
+                            //Needs invuln state
+                            stats.damage(damageOnTouch);
+                        }
+                    }
                 }
             }
 
