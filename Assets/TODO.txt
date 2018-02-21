@@ -11,6 +11,7 @@ Apply a small time window where input doesn't effect player movement after a wal
 fix bug where the player appears to jitter ever so slightly while moving on platforms.
 Decide on a sprite animation system
 Convert all timers into CoRoutines
+Disable renderer on platforms not in camera view
 
 -Future Ideas
 Give each weapon a "super move" meter, which stops time briefly, gives iframes, and performs a charged up attack based on weapon fire type.
