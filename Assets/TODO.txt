@@ -7,6 +7,7 @@ Make an enemy that can take multiple hits
 Make a multi-part boss enemy (like a robot with a bunch of limbs)
 Refine camera movements and control, where possible.
 Zoom out the camera a bit, let the player see more.
+Apply a small time window where input doesn't effect player movement after a wall jump, to provide slightly easier max-distance wall jumping.
 fix bug where the player appears to jitter ever so slightly while moving on platforms.
 Decide on a sprite animation system
 Convert all timers into CoRoutines
