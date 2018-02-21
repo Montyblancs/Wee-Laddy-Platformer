@@ -705,10 +705,9 @@ public class CharacterStats : MonoBehaviour
     public void damage(float amount)
     {
         this.modStat(StatType.HP, 0f - amount);
-        if (immutableStats != StatType.HP)
-        {
-            StartCoroutine(InvulnState());
-        }      
+        // if stat is already immutable, can't go invuln
+        if ((this.immutableStats & StatType.HP) == StatType.HP) { return; }
+        StartCoroutine(InvulnState());
     }
 
     //Coroutine - Makes this damage immune. Call after taking damage.
