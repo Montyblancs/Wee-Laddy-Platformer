@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 // static class for extending enumeration methods.
@@ -706,20 +707,47 @@ public class CharacterStats : MonoBehaviour
     {
         this.modStat(StatType.HP, 0f - amount);
         // if stat is already immutable, can't go invuln
-        if ((this.immutableStats & StatType.HP) == StatType.HP) { return; }
-        StartCoroutine(InvulnState());
+        this.invulnState();
     }
 
-    //Coroutine - Makes this damage immune. Call after taking damage.
-    private IEnumerator<WaitForSeconds> InvulnState()
+    // sets HP to be immutable for the amount of time set in invulnTime
+    private void invulnState()
     {
-        // SetFlag
-        immutableStats |= StatType.HP;
-        Debug.Log("Chararcter is invuln");
-        yield return new WaitForSeconds(invulnTime);
-        Debug.Log("Invuln Over");
-        // ClearFlag 
-        immutableStats &= ~StatType.HP;
+        this.setImmutable(StatType.HP, invulnTime);
+    }
+
+    // make a stat immutable
+    public void setImmutable(StatType type)
+    {
+        // Set Flag. If its already set, nothing will change.
+        this.immutableStats |= type;
+    }
+
+    // make a stat immutable for a set amount of time.
+    public void setImmutable(StatType type, float duration)
+    {
+        // if stat is already immutable, don't start another coroutine
+        if ((this.immutableStats & type) == type) { return; }
+        // start a coroutine to run the desired amount of time.
+        StartCoroutine(ImmutableState(type, duration));
+    }
+
+    // remove any immutable flag for this stat so it can be changed again.
+    public void clearImmutable(StatType type)
+    {
+        // Clear Flag. If it is already cleared, nothing should change.
+        this.immutableStats &= ~type;
+    }
+
+    // For referance - https://docs.unity3d.com/ScriptReference/MonoBehaviour.StartCoroutine.html
+    // Coroutine - make a stat immutable for a period of time.
+    private IEnumerator ImmutableState(StatType type, float duration)
+    {
+        this.setImmutable(type);
+        Debug.Log("Stat "+type+" is immutable");
+        yield return new WaitForSeconds(duration);
+        this.clearImmutable(type);
+        Debug.Log("Stat "+type+" is no longer immutable");
     }
 
     // return HP to its "full" value
