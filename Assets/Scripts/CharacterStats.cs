@@ -714,11 +714,13 @@ public class CharacterStats : MonoBehaviour
     //Coroutine - Makes this damage immune. Call after taking damage.
     private IEnumerator<WaitForSeconds> InvulnState()
     {
-        immutableStats = StatType.HP;
+        // SetFlag
+        immutableStats |= StatType.HP;
         Debug.Log("Chararcter is invuln");
         yield return new WaitForSeconds(invulnTime);
         Debug.Log("Invuln Over");
-        immutableStats = StatType.NONE;
+        // ClearFlag 
+        immutableStats &= ~StatType.HP;
     }
 
     // return HP to its "full" value
