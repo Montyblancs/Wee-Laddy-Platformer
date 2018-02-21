@@ -288,7 +288,7 @@ public class CharacterStats : MonoBehaviour {
 
 	// All essential intialization after the component is instantiated and before the component gets enabled.
 	void Awake () {
-		// because dictionaries are nto serializable, we will load the data from lists first
+		// because dictionaries are not serializable, we will load the data from lists first
 		this.loadStatSet();
 		// make sure at least the base stat for HP is greater than zero
 		if (this.BaseHP <= 0f) {
