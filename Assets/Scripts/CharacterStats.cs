@@ -713,7 +713,11 @@ public class CharacterStats : MonoBehaviour
     // sets HP to be immutable for the amount of time set in invulnTime
     private void invulnState()
     {
-        this.setImmutable(StatType.HP, invulnTime);
+        //Check for 0 to allow stat system on enemy w/ no invuln
+        if (invulnTime > 0)
+        {
+            this.setImmutable(StatType.HP, invulnTime);
+        }     
     }
 
     // make a stat immutable

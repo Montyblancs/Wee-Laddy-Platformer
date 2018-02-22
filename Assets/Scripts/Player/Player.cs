@@ -42,8 +42,6 @@ public class Player : MonoBehaviour
     public Material dodgeMaterial;
     public Material baseMaterial;
     public float dodgeDuration = 0.2f;
-    float dodgeInputTimer = 0f;
-    float dodgeTimer = 0f;
 
     public GameObject farBulletParentContainer;
     public GameObject nearBulletParentContainer;
@@ -55,7 +53,8 @@ public class Player : MonoBehaviour
     short currentShotType;
     int specialRoundsLeft;
     float specialFireRate;
-    float timeToNextFire;
+    private bool canFire;
+    private bool canDodge;
     public GameObject spawnPoint;
 
     public Camera playerCam;
@@ -82,8 +81,8 @@ public class Player : MonoBehaviour
     int shotDir; //0 - flat 1 - far
 
     // variables to determine what the player is currently able to do
-    public bool canMove = true;
-    public bool canFire = true;
+    public bool statCanMove = true;
+    public bool statCanFire = true;
 
     // holds a list of all active coroutines started by this object
     private List<string> activeCoroutines = new List<string> { };
@@ -96,8 +95,8 @@ public class Player : MonoBehaviour
         render = GetComponent<Renderer>();
 
         // set the boolean enablers to default state
-        this.canMove = true;
-        this.canFire = true;
+        statCanMove = true;
+        statCanFire = true;
 
         // start checking the player stats so we can have the player reflect the condition
         StartCoroutine("MonitorCondition");
@@ -115,7 +114,8 @@ public class Player : MonoBehaviour
         thisProjectileController = projectileType.GetComponent<ProjectileController>();
         shotSound = thisProjectileController.shotSound;
         currentShotType = 0;
-        timeToNextFire = 0;
+        canFire = true;
+        canDodge = true;
         specialRoundsLeft = -1;
         specialFireRate = -1;
     }
@@ -140,14 +140,46 @@ public class Player : MonoBehaviour
             }
         }
 
-        if (timeToNextFire > 0)
-            timeToNextFire -= Time.deltaTime;
-        if (dodgeInputTimer > 0)
-            dodgeInputTimer -= Time.deltaTime;
-        if (dodgeTimer > 0)
-            dodgeTimer -= Time.deltaTime;
-        else if (controller.isDodging && dodgeTimer <= 0)
-            ResetDodgeFlag();
+        //if (dodgeTimer > 0)
+        //    dodgeTimer -= Time.deltaTime;
+        //else if (controller.isDodging && dodgeTimer <= 0)
+        //    ResetDodgeFlag();
+    }
+
+    //Coroutine Timers
+    private IEnumerator FireTimer(float duration)
+    {
+        if (canFire && duration > 0)
+        {
+            canFire = !canFire;
+            yield return new WaitForSeconds(duration);
+            canFire = !canFire;
+        }
+    }
+
+    private IEnumerator DodgeTimer(float duration)
+    {
+        //Dodge movement is handled in Controller2D
+        if (!controller.isDodging && duration > 0)
+        {
+            controller.isDodging = true;
+            gameObject.layer = dodgeLayer;
+            render.material = dodgeMaterial;
+            yield return new WaitForSeconds(duration);
+            controller.isDodging = false;
+            gameObject.layer = playerLayer;
+            render.material = baseMaterial;
+        }
+    }
+
+    private IEnumerator DodgeCooldownTimer(float duration)
+    {
+        if (canDodge && duration > 0)
+        {
+            canDodge = !canDodge;
+            yield return new WaitForSeconds(duration);
+            canDodge = !canDodge;
+        }
     }
 
     public void OnEnable()
@@ -181,14 +213,14 @@ public class Player : MonoBehaviour
 
     public void SetDirectionalInput(Vector2 input)
     {
-        directionalInput = (!this.canMove) ? Vector2.zero : input;
+        directionalInput = (!statCanMove) ? Vector2.zero : input;
     }
 
     //Inputs
     public void OnJumpInputDown()
     {
         // just the return if this function is disabled
-        if (!this.canMove) return;
+        if (!statCanMove) return;
         // if this player is wallsliding, do a few special things.
         if (wallSliding)
         {
@@ -228,7 +260,7 @@ public class Player : MonoBehaviour
     public void OnJumpInputUp()
     {
         // just the return if this movement functionality is disabled
-        if (!this.canMove) return;
+        if (!statCanMove) return;
         if (velocity.y > minJumpVelocity)
         {
             velocity.y = minJumpVelocity;
@@ -238,9 +270,9 @@ public class Player : MonoBehaviour
     public void OnMouseButtonDown()
     {
         // just the return if this function is disabled
-        if (!this.canFire) return;
+        if (!statCanFire) return;
         //Semi-Auto fire only, see MouseButtonHold for full auto
-        if ((currentShotType == 0 || currentShotType == 2) && timeToNextFire <= 0)
+        if ((currentShotType == 0 || currentShotType == 2) && canFire)
         {
             var fireDirection = controller.collisions.faceDir;
             //Determine if player is wall sliding, don't allow fire inside of wall
@@ -370,7 +402,8 @@ public class Player : MonoBehaviour
 
             objectAudio.PlayOneShot(shotSound, 0.3f);
 
-            timeToNextFire = specialFireRate;
+            //Start fire timer coroutine
+            StartCoroutine(FireTimer(specialFireRate));
             if (specialRoundsLeft != -1)
                 specialRoundsLeft--;
 
@@ -383,8 +416,8 @@ public class Player : MonoBehaviour
     public void OnMouseButtonHold()
     {
         // just the return if this function is disabled
-        if (!this.canFire) return;
-        if (currentShotType == 1 && timeToNextFire <= 0)
+        if (!statCanFire) return;
+        if (currentShotType == 1 && canFire)
         {
             var fireDirection = controller.collisions.faceDir;
             //Determine if player is wall sliding, don't allow fire inside of wall
@@ -424,7 +457,8 @@ public class Player : MonoBehaviour
 
             objectAudio.PlayOneShot(shotSound, 0.3f);
 
-            timeToNextFire = specialFireRate;
+            //start FireTimer CoRoutine
+            StartCoroutine(FireTimer(specialFireRate));
             if (specialRoundsLeft != -1)
                 specialRoundsLeft--;
 
@@ -450,32 +484,12 @@ public class Player : MonoBehaviour
 
     public void OnDodgeRoll()
     {
-        if (dodgeInputTimer <= 0 && !controller.isDodging)
+        ////Dodge movement is handled in Controller2D
+        if (canDodge && !controller.isDodging)
         {
-            //if (controller.collisions.slidingDownMaxSlope)
-            //{
-            //    if (directionalInput.x != -Mathf.Sign(controller.collisions.slopeNormal.x))
-            //    { // not jumping against max slope
-            //        velocity.y = maxJumpVelocity * controller.collisions.slopeNormal.y;
-            //        velocity.x = maxJumpVelocity * controller.collisions.slopeNormal.x;
-            //    }
-            //}
-            //else
-            //{
-            controller.isDodging = true;
-            gameObject.layer = dodgeLayer;
-            render.material = dodgeMaterial;
-            dodgeTimer = dodgeDuration;
-            dodgeInputTimer = dodgeCooldown;
-            //}
+            StartCoroutine(DodgeTimer(dodgeDuration));
+            StartCoroutine(DodgeCooldownTimer(dodgeCooldown));
         }
-    }
-
-    private void ResetDodgeFlag()
-    {
-        controller.isDodging = false;
-        gameObject.layer = playerLayer;
-        render.material = baseMaterial;
     }
 
     //Weapons
@@ -570,8 +584,8 @@ public class Player : MonoBehaviour
                     stats.kill();
                 }
                 // disable all functionality
-                this.canMove = false;
-                this.canFire = false;
+                statCanMove = false;
+                statCanFire = false;
                 // set the new applied condition
                 appliedCondition = stats.Condition;
                 // wait a few seconds before being able to live or die again
@@ -584,8 +598,8 @@ public class Player : MonoBehaviour
                     stats.revive();
                 }
                 // enable all functionality
-                this.canMove = true;
-                this.canFire = true;
+                statCanMove = true;
+                statCanFire = true;
                 // set the new applied condition
                 appliedCondition = stats.Condition;
                 // put the player back were they belong
