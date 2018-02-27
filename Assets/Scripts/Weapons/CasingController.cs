@@ -7,7 +7,7 @@ public class CasingController : MonoBehaviour
     public float moveSpeed;
     public float timeToLive = 3f;
     public LayerMask platformLayer;
-    private BoxCollider2D thisCollider;
+    //private BoxCollider2D thisCollider;
     private bool stopMoving = false;
 
     // Use this for initialization
@@ -15,7 +15,7 @@ public class CasingController : MonoBehaviour
     {
         //Use https://docs.unity3d.com/ScriptReference/Collider2D.IsTouchingLayers.html
         //Collider2D.IsTouchingLayers
-        thisCollider = GetComponent<BoxCollider2D>();
+        //thisCollider = GetComponent<BoxCollider2D>();
     }
 
     // Update is called once per frame

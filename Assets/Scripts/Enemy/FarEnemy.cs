@@ -1,10 +1,8 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using UnityEngine;
 
-[RequireComponent(typeof(EnemyController2D))]
-public class Enemy : MonoBehaviour
+public class FarEnemy : MonoBehaviour
 {
-
     public float maxJumpHeight = 4;
     public float minJumpHeight = 1;
     public float timeToJumpApex = .4f;
@@ -14,7 +12,7 @@ public class Enemy : MonoBehaviour
     public float moveSpeed = 6;
     public float shootDelay = 5;
     public GameObject projectileType;
-    public GameObject enemyNearBulletParentContainer;
+    public GameObject enemyFarBulletParentContainer;
     public Camera mainCam;
     public float damageOnTouch;
 
@@ -33,9 +31,9 @@ public class Enemy : MonoBehaviour
     Vector3 velocity;
     float velocityXSmoothing;
 
-    EnemyController2D controller;
+    EnemyController3D controller;
 
-    BoxCollider2D thisCollider;
+    BoxCollider thisCollider;
     BoxCollider2D playerCollider;
 
     Vector2 directionalInput;
@@ -49,7 +47,7 @@ public class Enemy : MonoBehaviour
 
     void Start()
     {
-        controller = GetComponent<EnemyController2D>();
+        controller = GetComponent<EnemyController3D>();
         velocity.x = 0;
         velocity.y = 0;
 
@@ -63,7 +61,7 @@ public class Enemy : MonoBehaviour
         fireTimerStarted = false;
         objectAudio = GetComponent<AudioSource>();
 
-        thisCollider = GetComponent<BoxCollider2D>();
+        thisCollider = GetComponent<BoxCollider>();
         playerCollider = targetToChase.GetComponent<BoxCollider2D>();
     }
 
@@ -160,7 +158,7 @@ public class Enemy : MonoBehaviour
                 if (!wHit)
                 {
                     GameObject thisProjectile = Instantiate(projectileType, bulletSpawnPoint, Quaternion.identity);
-                    thisProjectile.transform.parent = enemyNearBulletParentContainer.transform;
+                    thisProjectile.transform.parent = enemyFarBulletParentContainer.transform;
 
                     ProjectileController projectileScript = thisProjectile.GetComponent<ProjectileController>();
 
@@ -184,7 +182,7 @@ public class Enemy : MonoBehaviour
             rend.enabled = false;
             if (isDying)
             {
-                BoxCollider2D thisBox = gameObject.GetComponent<BoxCollider2D>();
+                BoxCollider thisBox = gameObject.GetComponent<BoxCollider>();
                 thisBox.enabled = false;
             }
         }
@@ -240,3 +238,4 @@ public class Enemy : MonoBehaviour
         velocity.y += gravity * Time.deltaTime;
     }
 }
+

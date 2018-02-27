@@ -299,6 +299,8 @@
     <Compile Include="Assets\Scripts\CharacterStats.cs" />
     <Compile Include="Assets\Scripts\Enemy\Enemy.cs" />
     <Compile Include="Assets\Scripts\Enemy\EnemyController2D.cs" />
+    <Compile Include="Assets\Scripts\Enemy\EnemyController3D.cs" />
+    <Compile Include="Assets\Scripts\Enemy\FarEnemy.cs" />
     <Compile Include="Assets\Scripts\ExposePropertyAttribute.cs" />
     <Compile Include="Assets\Scripts\HideObjectNotInView.cs" />
     <Compile Include="Assets\Scripts\PlatformController.cs" />
@@ -306,6 +308,7 @@
     <Compile Include="Assets\Scripts\Player\Player.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerInput.cs" />
     <Compile Include="Assets\Scripts\RaycastController.cs" />
+    <Compile Include="Assets\Scripts\RaycastController3D.cs" />
     <Compile Include="Assets\Scripts\Weapons\CasingController.cs" />
     <Compile Include="Assets\Scripts\Weapons\PickupController.cs" />
     <Compile Include="Assets\Scripts\Weapons\ProjectileController.cs" />
