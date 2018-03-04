@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -173,6 +174,10 @@ public class CharacterStats : MonoBehaviour
     private StatType conditionStats = StatType.HP;
     // flags to define what stats cannot be modified. Initially this is will be no stat types.
     private StatType immutableStats = StatType.NONE;
+    // TODO: expand this to be a dictionary or a member of the stats struct, it can dynamically be used to set ui for all stats.
+    // for now, just store 1 slider for health
+    [SerializeField]
+    public Slider healthSlider;
     // getters and setters for base stats.
     public float BaseHP
     {
@@ -316,6 +321,11 @@ public class CharacterStats : MonoBehaviour
         {
             this.BaseHP = 1;
         }
+        // update the UI if applicable
+        if (this.healthSlider) {
+            this.healthSlider.maxValue = this.BaseHP;
+            this.healthSlider.maxValue = this.HP;
+        }
     }
 
     // Initialization after the component first gets enabled. This happens on the very next Update() call.
@@ -436,6 +446,10 @@ public class CharacterStats : MonoBehaviour
         {
             this.statSet[type] = new StatValue(value, this.statSet[type].modifier, this.statSet[type].lowerLimit, this.statSet[type].upperLimit);
         }
+        // update the UI if applicable
+        if (this.healthSlider && type == StatType.HP) {
+            this.healthSlider.maxValue = value;
+        }
         // store the Dictionary into serializable lists after any change
         this.storeStatSet();
     }
@@ -458,6 +472,10 @@ public class CharacterStats : MonoBehaviour
         else
         {
             this.statSet.Add(type, value);
+        }
+        // update the UI if applicable
+        if (this.healthSlider && type == StatType.HP) {
+            this.healthSlider.maxValue = value;
         }
         // store the Dictionary into serializable lists after any change
         this.storeStatSet();
@@ -482,13 +500,14 @@ public class CharacterStats : MonoBehaviour
     // this will not update any dependants so its kept private
     private void setOrAddStatMod(StatType type, float value)
     {
-        if (this.statSet.ContainsKey(type))
-        {
+        if (this.statSet.ContainsKey(type)) {
             this.statSet[type] = new StatValue(this.statSet[type].baseValue, value, this.statSet[type].lowerLimit, this.statSet[type].upperLimit);
-        }
-        else
-        {
+        } else {
             this.statSet.Add(type, new StatValue(0f, value));
+        }
+        // update the UI if applicable
+        if (this.healthSlider && type == StatType.HP) {
+            this.healthSlider.value = this.getStat(type);
         }
         // store the Dictionary into serializable lists after any change
         this.storeStatSet();
