@@ -648,12 +648,11 @@ public class CharacterStats : MonoBehaviour
     {
         // if the condition UI iamges are not set, then we can do nothing
         if (!this.conditionImage || !this.healthySprite || !this.deadSprite) { return; }
-        // swap to the healthy sprite if it is not dead.
-        Debug.Log("Updateing UI Condidtion. The condition is "+this.condition);
-        if (this.condition != ConditionType.DEAD && this.conditionImage.sprite != this.healthySprite)  {
-            conditionImage.sprite = this.healthySprite;
-        } else if (this.conditionImage.sprite != this.deadSprite) {
+        // swap the sprite to the proper image for the current condition.
+        if (this.condition == ConditionType.DEAD && this.conditionImage.sprite != this.deadSprite) {
             conditionImage.sprite = this.deadSprite;
+        } else if (this.condition != ConditionType.DEAD && this.conditionImage.sprite != this.healthySprite) {
+            conditionImage.sprite = this.healthySprite;
         }
     }
 
