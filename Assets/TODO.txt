@@ -1,6 +1,5 @@
 Develop more weapons/pickups for the player
   -Make bullet casings slightly more dynamic
-Make a HUD
 Make a far enemy that shoots from and moves around on background platforms
 Make a flying enemy
 Make an enemy that can take multiple hits
@@ -12,6 +11,7 @@ fix bug where the player appears to jitter ever so slightly while moving on plat
 Decide on a sprite animation system
 Convert all timers into CoRoutines
 Disable renderer on platforms not in camera view
+Improve HUD, adding some indication of your current weapon/ammo etc.
 
 -Bugfixes
 Shotgun spread on flat plane is dependent on cursor distance from player. Make this indipendent.
