@@ -36,10 +36,11 @@ public class RaycastController3D : MonoBehaviour
         Bounds bounds = colliderCust.bounds;
         bounds.Expand(skinWidth * -2);
 
-        raycastOrigins.bottomLeft = new Vector2(bounds.min.x, bounds.min.y);
-        raycastOrigins.bottomRight = new Vector2(bounds.max.x, bounds.min.y);
-        raycastOrigins.topLeft = new Vector2(bounds.min.x, bounds.max.y);
-        raycastOrigins.topRight = new Vector2(bounds.max.x, bounds.max.y);
+        raycastOrigins.bottomLeft = new Vector3(bounds.min.x, bounds.min.y, bounds.min.z);
+        raycastOrigins.bottomRight = new Vector3(bounds.max.x, bounds.min.y, bounds.min.z);
+        raycastOrigins.topLeft = new Vector3(bounds.min.x, bounds.max.y, bounds.min.z);
+        raycastOrigins.topRight = new Vector3(bounds.max.x, bounds.max.y, bounds.min.z);
+        raycastOrigins.zIndex = bounds.center.z;
     }
 
     public void CalculateRaySpacing()
@@ -61,5 +62,6 @@ public class RaycastController3D : MonoBehaviour
     {
         public Vector2 topLeft, topRight;
         public Vector2 bottomLeft, bottomRight;
+        public float zIndex;
     }
 }

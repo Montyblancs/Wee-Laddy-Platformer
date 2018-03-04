@@ -20,6 +20,7 @@ public class CameraFollow_v2 : MonoBehaviour
     //Paralax Vars
     public GameObject BGParentObject;
     public GameObject bulletParentObject;
+    public GameObject farEnemyContainer;
     [Range(0, 1)]
     public float BackgroundSpeed;
 
@@ -60,6 +61,7 @@ public class CameraFollow_v2 : MonoBehaviour
         //Parallax Scrolling
         cameraFocusPoint = new Vector3(transform.position.x * BackgroundSpeed, transform.position.y * BackgroundSpeed, 0.0f);
         BGParentObject.transform.position = cameraFocusPoint;
+        farEnemyContainer.transform.position = cameraFocusPoint;
         bulletParentObject.transform.position = cameraFocusPoint;
     }
 
