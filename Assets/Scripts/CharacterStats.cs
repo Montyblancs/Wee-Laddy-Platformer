@@ -178,6 +178,15 @@ public class CharacterStats : MonoBehaviour
     // for now, just store 1 slider for health
     [SerializeField]
     public Slider healthSlider;
+    // an image in the UI to reflect this stat's condition
+    [SerializeField]
+    public Image conditionImage;
+    // an sprite that will reflect a HEALTHY condition in the UI
+    [SerializeField]
+    public Sprite healthySprite;
+    // an sprite that will reflect a DEAD condition in th UI
+    [SerializeField]
+    public Sprite deadSprite;
     // getters and setters for base stats.
     public float BaseHP
     {
@@ -612,6 +621,8 @@ public class CharacterStats : MonoBehaviour
             this.pendingCondition = ConditionType.NONE;
             // TODO: consider making HP immutable, so that the character has to be "revived" before they can heal?
             Debug.Log("The character \"" + this.characterName + "\" is now in a " + this.condition.ToString() + " state");
+            // make sure the UI reflects any changes in condition.
+            this.updateConditionUI();
             return;
         }
         // check if the player has has come back from death
@@ -627,6 +638,22 @@ public class CharacterStats : MonoBehaviour
             Debug.Log("The character \"" + this.characterName + "\" is now in a " + this.condition.ToString() + " state");
             // clear any pending condition
             this.pendingCondition = ConditionType.NONE;
+            // make sure the UI reflects any changes in condition.
+            this.updateConditionUI();
+        }
+    }
+
+    // make sure the ui reflects the current status.
+    public void updateConditionUI()
+    {
+        // if the condition UI iamges are not set, then we can do nothing
+        if (!this.conditionImage || !this.healthySprite || !this.deadSprite) { return; }
+        // swap to the healthy sprite if it is not dead.
+        Debug.Log("Updateing UI Condidtion. The condition is "+this.condition);
+        if (this.condition != ConditionType.DEAD && this.conditionImage.sprite != this.healthySprite)  {
+            conditionImage.sprite = this.healthySprite;
+        } else if (this.conditionImage.sprite != this.deadSprite) {
+            conditionImage.sprite = this.deadSprite;
         }
     }
 
@@ -767,10 +794,10 @@ public class CharacterStats : MonoBehaviour
     private IEnumerator ImmutableState(StatType type, float duration)
     {
         this.setImmutable(type);
-        Debug.Log("Stat "+type+" is immutable");
+        // Debug.Log("Stat "+type+" is immutable");
         yield return new WaitForSeconds(duration);
         this.clearImmutable(type);
-        Debug.Log("Stat "+type+" is no longer immutable");
+        // Debug.Log("Stat "+type+" is no longer immutable");
     }
 
     // return HP to its "full" value
