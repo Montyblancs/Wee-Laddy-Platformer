@@ -36,8 +36,8 @@ public class Player : MonoBehaviour
     public float wallSlideSpeedMax = 3;
     public float wallStickTime = .25f;
 
-    public int dodgeLayer;
-    public int playerLayer;
+    public sbyte dodgeLayer;
+    public sbyte playerLayer;
     public float dodgeCooldown = 3f;
     public Material dodgeMaterial;
     public Material baseMaterial;
@@ -50,8 +50,11 @@ public class Player : MonoBehaviour
     public GameObject projectileType;
     ProjectileController thisProjectileController;
     AudioClip shotSound;
-    short currentShotType;
-    int specialRoundsLeft;
+    byte currentShotType;
+    static byte SHOT_NORMAL = 0;
+    static byte SHOT_CHAINGUN = 1;
+    static byte SHOT_SHOTGUN = 2;
+    short specialRoundsLeft;
     float specialFireRate;
     private bool canFire;
     private bool canDodge;
@@ -74,11 +77,13 @@ public class Player : MonoBehaviour
     Vector2 directionalInput;
     AudioSource objectAudio;
     bool wallSliding;
-    int wallDirX;
+    short wallDirX;
 
     public Texture2D FlatCursor;
     public Texture2D FarCursor;
-    int shotDir; //0 - flat 1 - far
+    byte shotDir;
+    static byte DIR_NEAR = 0;
+    static byte DIR_FAR = 1;
 
     // variables to determine what the player is currently able to do
     public bool statCanMove = true;
@@ -106,14 +111,14 @@ public class Player : MonoBehaviour
         maxJumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
         minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(gravity) * minJumpHeight);
 
-        shotDir = 0;
+        shotDir = DIR_NEAR;
         Cursor.lockState = CursorLockMode.Confined;
         Cursor.SetCursor(FlatCursor, new Vector2(15, 15), CursorMode.Auto);
 
         objectAudio = GetComponent<AudioSource>();
         thisProjectileController = projectileType.GetComponent<ProjectileController>();
         shotSound = thisProjectileController.shotSound;
-        currentShotType = 0;
+        currentShotType = SHOT_NORMAL;
         canFire = true;
         canDodge = true;
         specialRoundsLeft = -1;
@@ -272,7 +277,7 @@ public class Player : MonoBehaviour
         // just the return if this function is disabled
         if (!statCanFire) return;
         //Semi-Auto fire only, see MouseButtonHold for full auto
-        if ((currentShotType == 0 || currentShotType == 2) && canFire)
+        if ((currentShotType == SHOT_NORMAL || currentShotType == SHOT_SHOTGUN) && canFire)
         {
             var fireDirection = controller.collisions.faceDir;
             //Determine if player is wall sliding, don't allow fire inside of wall
@@ -281,12 +286,12 @@ public class Player : MonoBehaviour
                 fireDirection = fireDirection * -1;
             }
 
-            if (currentShotType == 0)
+            if (currentShotType == SHOT_NORMAL)
             {
                 //Create a projectile that travels towards the current position of the mouse cursor.
                 //gameObject refers to the parent object of this script
                 GameObject thisProjectile = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
-                if (shotDir == 1)
+                if (shotDir == DIR_FAR)
                 {
                     thisProjectile.transform.parent = farBulletParentContainer.transform;
                 }
@@ -301,7 +306,7 @@ public class Player : MonoBehaviour
                 //Mouse position is not equal to position in game world, just the position on the screen.
                 //Need game world equivilent position for this coord.
                 Vector3 shotTarget = Input.mousePosition;
-                if (shotDir == 0)
+                if (shotDir == DIR_NEAR)
                 {
                     shotTarget.z = 10;
                 }
@@ -312,25 +317,18 @@ public class Player : MonoBehaviour
 
                 projectileScript.targetCoords = playerCam.ScreenToWorldPoint(shotTarget);
             }
-            else if (currentShotType == 2)
+            else if (currentShotType == SHOT_SHOTGUN)
             {
-                //Create a projectile that travels towards the current position of the mouse cursor.
-                //gameObject refers to the parent object of this script
-                GameObject p1 = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
-                GameObject p2 = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
-                GameObject p3 = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
-                GameObject p4 = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
-                GameObject p5 = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
-                //Make a list so I don't have to repeat these fuckin' lines 5 times
-                List<GameObject> theseBullets = new List<GameObject>
+                //A shotgun spread blast
+                //Note : flat plane spread is dependent on cursor distance from player. Make spread static in the future
+                List<GameObject> theseBullets = new List<GameObject>();
+                for (byte i = 1; i <= 5; i++)
                 {
-                    p1,
-                    p2,
-                    p3,
-                    p4,
-                    p5
-                };
-                if (shotDir == 1)
+                    GameObject thisBullet = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
+                    theseBullets.Add(thisBullet);
+                }
+
+                if (shotDir == DIR_FAR)
                 {
                     foreach (GameObject TB in theseBullets)
                     {
@@ -356,7 +354,7 @@ public class Player : MonoBehaviour
                 //Mouse position is not equal to position in game world, just the position on the screen.
                 //Need game world equivilent position for this coord.
                 Vector3 shotTarget = Input.mousePosition;
-                if (shotDir == 0)
+                if (shotDir == DIR_NEAR)
                 {
                     shotTarget.z = 10;
 
@@ -417,7 +415,7 @@ public class Player : MonoBehaviour
     {
         // just the return if this function is disabled
         if (!statCanFire) return;
-        if (currentShotType == 1 && canFire)
+        if (currentShotType == SHOT_CHAINGUN && canFire)
         {
             var fireDirection = controller.collisions.faceDir;
             //Determine if player is wall sliding, don't allow fire inside of wall
@@ -429,7 +427,7 @@ public class Player : MonoBehaviour
             //Create a projectile that travels towards the current position of the mouse cursor.
             //gameObject refers to the parent object of this script
             GameObject thisProjectile = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
-            if (shotDir == 1)
+            if (shotDir == DIR_FAR)
             {
                 thisProjectile.transform.parent = farBulletParentContainer.transform;
             }
@@ -444,7 +442,7 @@ public class Player : MonoBehaviour
             //Mouse position is not equal to position in game world, just the position on the screen.
             //Need game world equivilent position for this coord.
             Vector3 shotTarget = Input.mousePosition;
-            if (shotDir == 0)
+            if (shotDir == DIR_NEAR)
             {
                 shotTarget.z = 10;
             }
@@ -469,16 +467,16 @@ public class Player : MonoBehaviour
 
     public void OnPlaneChange()
     {
-        if (shotDir == 0)
+        if (shotDir == DIR_NEAR)
         {
             //Switch to far
             Cursor.SetCursor(FarCursor, new Vector2(FarCursor.width / 2, FarCursor.height / 2), CursorMode.Auto);
-            shotDir = 1;
+            shotDir = DIR_FAR;
         }
         else
         {
             Cursor.SetCursor(FlatCursor, new Vector2(FlatCursor.width / 2, FlatCursor.height / 2), CursorMode.Auto);
-            shotDir = 0;
+            shotDir = DIR_NEAR;
         }
     }
 
@@ -493,7 +491,7 @@ public class Player : MonoBehaviour
     }
 
     //Weapons
-    public void ProjectileChange(GameObject bulletType, int numShots, short fireType, float fireRate)
+    public void ProjectileChange(GameObject bulletType, short numShots, byte fireType, float fireRate)
     {
         projectileType = bulletType;
         specialRoundsLeft = numShots;
@@ -507,7 +505,7 @@ public class Player : MonoBehaviour
     void HandleWallSliding()
     {
         // get the direction the wall is in
-        wallDirX = (controller.collisions.left) ? -1 : 1;
+        wallDirX = (controller.collisions.left) ? (short)-1 : (short)1;
         // check if directional input is "away" from the wall
         bool inputAway = (directionalInput.x != wallDirX && directionalInput.x != 0) ? true : false;
         // check if we are wall sliding

@@ -45,6 +45,9 @@ public class FarEnemy : MonoBehaviour
 
     Renderer rend;
 
+    //TODO : Mouse movement that causes the camera to pan up throws farEnemies through platforms
+    //Proposal : Include container of far enemy in camera script, shift the same as the special shift for background objects.
+
     void Start()
     {
         controller = GetComponent<EnemyController3D>();
@@ -72,52 +75,6 @@ public class FarEnemy : MonoBehaviour
         {
             rend.enabled = true;
             CalculateVelocity();
-            Vector2 TowardsPlayer = new Vector2(0, 0);
-
-            if (targetToChase.transform.position.x < gameObject.transform.position.x)
-            {
-                if (Vector3.Distance(targetToChase.transform.position, gameObject.transform.position) >= 6f)
-                {
-                    TowardsPlayer.x = -1f;
-                }
-                else if (Vector3.Distance(targetToChase.transform.position, gameObject.transform.position) <= 4f)
-                {
-                    TowardsPlayer.x = 1f;
-                    //Check if player is touching
-                    if (thisCollider.bounds.Intersects(playerCollider.bounds))
-                    {
-                        CharacterStats stats;
-                        if (stats = targetToChase.GetComponent<CharacterStats>())
-                        {
-                            //Needs invuln state
-                            stats.damage(damageOnTouch);
-                        }
-                    }
-                }
-            }
-            else if (targetToChase.transform.position.x >= gameObject.transform.position.x)
-            {
-                if (Vector3.Distance(targetToChase.transform.position, gameObject.transform.position) >= 6f)
-                {
-                    TowardsPlayer.x = 1f;
-                }
-                else if (Vector3.Distance(targetToChase.transform.position, gameObject.transform.position) <= 4f)
-                {
-                    TowardsPlayer.x = -1f;
-                    //Check if player is touching
-                    if (thisCollider.bounds.Intersects(playerCollider.bounds))
-                    {
-                        CharacterStats stats;
-                        if (stats = targetToChase.GetComponent<CharacterStats>())
-                        {
-                            //Needs invuln state
-                            stats.damage(damageOnTouch);
-                        }
-                    }
-                }
-            }
-
-            SetDirectionalInput(TowardsPlayer);
 
             controller.Move(velocity * Time.deltaTime, directionalInput);
 
@@ -142,7 +99,7 @@ public class FarEnemy : MonoBehaviour
                 //Fire Projectile at player
                 var fireDirection = controller.collisions.faceDir;
 
-                Vector3 bulletSpawnPoint = new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5);
+                Vector3 bulletSpawnPoint = new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, gameObject.transform.position.z);
                 Vector3 shotTarget = targetToChase.transform.position;
                 shotTarget.z = 0;
 

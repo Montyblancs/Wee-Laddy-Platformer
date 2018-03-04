@@ -63,8 +63,10 @@ public class EnemyController3D : RaycastController3D
 
         for (int i = 0; i < horizontalRayCount; i++)
         {
-            Vector2 rayOrigin = (directionX == -1) ? raycastOrigins.bottomLeft : raycastOrigins.bottomRight;
-            rayOrigin += Vector2.up * (horizontalRaySpacing * i);
+            Vector3 rayOrigin = (directionX == -1) ? raycastOrigins.bottomLeft : raycastOrigins.bottomRight;
+            rayOrigin.z = raycastOrigins.zIndex;
+            Vector2 rayAdd = Vector2.up * (horizontalRaySpacing * i);
+            rayOrigin += (Vector3)rayAdd;
             RaycastHit hit = new RaycastHit();
             bool didHit = Physics.Raycast(rayOrigin, Vector2.right * directionX, out hit, rayLength, collisionMask);
 
@@ -122,8 +124,10 @@ public class EnemyController3D : RaycastController3D
         for (int i = 0; i < verticalRayCount; i++)
         {
             //Update all rayOrigins in Raycasts to Vector3, need to recalculate RayOrigin for z coord. (Should be 16 in this example, get from object)
-            Vector2 rayOrigin = (directionY == -1) ? raycastOrigins.bottomLeft : raycastOrigins.topLeft;
-            rayOrigin += Vector2.right * (verticalRaySpacing * i + moveAmount.x);
+            Vector3 rayOrigin = (directionY == -1) ? raycastOrigins.bottomLeft : raycastOrigins.topLeft;
+            rayOrigin.z = raycastOrigins.zIndex;
+            Vector2 rayAdd = Vector2.right * (verticalRaySpacing * i + moveAmount.x);
+            rayOrigin += (Vector3)rayAdd;
 
             RaycastHit hit = new RaycastHit();
             bool didBoundHit = Physics.Raycast(rayOrigin, Vector2.up * directionY, rayLength, worldBoundMask);
@@ -167,7 +171,8 @@ public class EnemyController3D : RaycastController3D
         {
             float directionX = Mathf.Sign(moveAmount.x);
             rayLength = Mathf.Abs(moveAmount.x) + skinWidth;
-            Vector2 rayOrigin = ((directionX == -1) ? raycastOrigins.bottomLeft : raycastOrigins.bottomRight) + Vector2.up * moveAmount.y;
+            Vector3 rayOrigin = ((directionX == -1) ? raycastOrigins.bottomLeft : raycastOrigins.bottomRight) + Vector2.up * moveAmount.y;
+            rayOrigin.z = raycastOrigins.zIndex;
             RaycastHit hit = new RaycastHit();
             bool didHit = Physics.Raycast(rayOrigin, Vector2.right * directionX, out hit, rayLength, collisionMask);
 

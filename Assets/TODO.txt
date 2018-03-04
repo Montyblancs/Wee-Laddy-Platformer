@@ -13,5 +13,8 @@ Decide on a sprite animation system
 Convert all timers into CoRoutines
 Disable renderer on platforms not in camera view
 
+-Bugfixes
+Shotgun spread on flat plane is dependent on cursor distance from player. Make this indipendent.
+
 -Future Ideas
 Give each weapon a "super move" meter, which stops time briefly, gives iframes, and performs a charged up attack based on weapon fire type.
