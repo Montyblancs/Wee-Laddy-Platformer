@@ -35,7 +35,7 @@ public class CameraFollow_v2 : MonoBehaviour
     void Start()
     {
         focusArea = new FocusArea(thisCollider.bounds, focusAreaSize, focusShiftDeadzone, focusShiftAnchor, focusShiftIntensity, thisCamera, target);
-        transform.position = new Vector3(thisCollider.bounds.center.x, thisCollider.bounds.center.y, -10f);
+        transform.position = new Vector3(thisCollider.bounds.center.x, thisCollider.bounds.center.y, 0f);
     }
 
     void LateUpdate()
@@ -51,11 +51,11 @@ public class CameraFollow_v2 : MonoBehaviour
         if (positionToFocus.magnitude > snapDistance)
         {
             // Set the Camera to 10 units away from 0 in the z axis, which should be the background layer
-            transform.position = Vector3.Lerp(transform.position, new Vector3(cameraFocusPoint.x, cameraFocusPoint.y, -10f), 0.4f);
+            transform.position = Vector3.Lerp(transform.position, new Vector3(cameraFocusPoint.x, cameraFocusPoint.y, 0f), 0.4f);
         }
         else
         {
-            transform.position = new Vector3(cameraFocusPoint.x, cameraFocusPoint.y, -10f);
+            transform.position = new Vector3(cameraFocusPoint.x, cameraFocusPoint.y, 0f);
         }
 
         //Parallax Scrolling

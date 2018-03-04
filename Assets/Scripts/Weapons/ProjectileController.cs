@@ -14,6 +14,9 @@ public class ProjectileController : MonoBehaviour
     public LayerMask enemyMask;
     public bool isEnemyBullet;
 
+    BoxCollider2D bulletCollider;
+    public BoxCollider2D playerBoxCollider = null;
+
     AudioSource objectAudio;
     Renderer rend;
 
@@ -24,17 +27,18 @@ public class ProjectileController : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        spawnCoords = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y, targetCoords.z);
+        spawnCoords = gameObject.transform.position;
         objectAudio = GetComponent<AudioSource>();
         rend = GetComponent<Renderer>();
+        bulletCollider = GetComponent<BoxCollider2D>();
 
         travelDirection.x = targetCoords.x - spawnCoords.x;
         travelDirection.y = targetCoords.y - spawnCoords.y;
         //z direction needs to be altered to hit background targets, 0 for foreground targets
-        travelDirection.z = targetCoords.z;
+        travelDirection.z = targetCoords.z - spawnCoords.z;
         travelDirection.Normalize();
     }
-    
+
     //Seperate function so casingContainer can be set before creating casing
     public void CreateCasing(Vector3 startPos)
     {
@@ -56,10 +60,6 @@ public class ProjectileController : MonoBehaviour
 
             if (gameObject.transform.position.z == 5)
             {
-                //Check for enemy hit before ground hit?
-                //to get object that was hit:
-                //hit.transform.gameObject
-
                 RaycastHit2D eHit = Physics2D.Raycast(gameObject.transform.position, travelDirection, Time.deltaTime * bulletSpeed, enemyMask);
                 Debug.DrawRay(gameObject.transform.position, travelDirection, Color.red);
 
@@ -67,7 +67,9 @@ public class ProjectileController : MonoBehaviour
                 {
                     if (isEnemyBullet)
                     {
-
+                        //2D enemies shouldn't need isEnemyBullet flag in the future when all entities have stats
+                        //Just call the below function for all character hits
+                        this.hit(eHit);
                     }
                     else
                     {
@@ -134,6 +136,18 @@ public class ProjectileController : MonoBehaviour
                     newScale = (0.25f / (gameObject.transform.position.z - 5f)) * 3f;
                     if (newScale < 0.03f)
                     {
+
+                        if (isEnemyBullet && playerBoxCollider != null)
+                        {
+                            gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y, 5);
+                            //Reached player z pos, need to check for 2dBox collision now, as opposed to 2dBox collision like above
+                            if (bulletCollider.bounds.Intersects(playerBoxCollider.bounds))
+                            {
+                                //We can guarentee that this target is the player
+                                PlayerHit3D();
+                            }
+
+                        }
                         Destroy(gameObject);
                     }
                     if (newScale > 0.25f)
@@ -157,12 +171,25 @@ public class ProjectileController : MonoBehaviour
         rend.enabled = false;
         // check if the thing we hit has stats
         CharacterStats stats;
-        if (stats = rayHit.collider.gameObject.GetComponent<CharacterStats>()) {
+        if (stats = rayHit.collider.gameObject.GetComponent<CharacterStats>())
+        {
             // if so we apply damage to the object
             stats.damage(this.damageAmount);
         }
         // remove this game objext
         Destroy(gameObject, pickedSound.length);
+    }
+
+    //For when a background enemy bullet passes a collision check w/ player
+    void PlayerHit3D()
+    {
+        //This function currently assumes that only one object will ever be tagged "Player"
+        GameObject[] thisPlayer = GameObject.FindGameObjectsWithTag("Player");
+        if (thisPlayer.Length > 0)
+        {
+            CharacterStats stats = thisPlayer[0].GetComponent<CharacterStats>();
+            stats.damage(damageAmount);
+        }
     }
 
     void OnCollisionEnter2D(Collision2D coll)
