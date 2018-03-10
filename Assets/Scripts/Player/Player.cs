@@ -290,7 +290,7 @@ public class Player : MonoBehaviour
             {
                 //Create a projectile that travels towards the current position of the mouse cursor.
                 //gameObject refers to the parent object of this script
-                GameObject thisProjectile = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
+                GameObject thisProjectile = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, gameObject.transform.position.z), Quaternion.identity);
                 if (shotDir == DIR_FAR)
                 {
                     thisProjectile.transform.parent = farBulletParentContainer.transform;
@@ -308,11 +308,12 @@ public class Player : MonoBehaviour
                 Vector3 shotTarget = Input.mousePosition;
                 if (shotDir == DIR_NEAR)
                 {
-                    shotTarget.z = 10;
+                    shotTarget.z = 5;
                 }
                 else
                 {
-                    shotTarget.z = 21;
+                    //Should we get the z index of an object under the cursor at the time of click for an accurate target?
+                    shotTarget.z = 16;
                 }
 
                 projectileScript.targetCoords = playerCam.ScreenToWorldPoint(shotTarget);
@@ -356,7 +357,7 @@ public class Player : MonoBehaviour
                 Vector3 shotTarget = Input.mousePosition;
                 if (shotDir == DIR_NEAR)
                 {
-                    shotTarget.z = 10;
+                    shotTarget.z = 5;
 
                     //Spread pattern
                     List<Vector3> alteredTargets = new List<Vector3>
@@ -377,7 +378,7 @@ public class Player : MonoBehaviour
                 }
                 else
                 {
-                    shotTarget.z = 21;
+                    shotTarget.z = 16;
 
                     //+ Pattern
                     List<Vector3> alteredTargets = new List<Vector3>
@@ -444,11 +445,11 @@ public class Player : MonoBehaviour
             Vector3 shotTarget = Input.mousePosition;
             if (shotDir == DIR_NEAR)
             {
-                shotTarget.z = 10;
+                shotTarget.z = 5;
             }
             else
             {
-                shotTarget.z = 21;
+                shotTarget.z = 16;
             }
 
             projectileScript.targetCoords = playerCam.ScreenToWorldPoint(shotTarget);

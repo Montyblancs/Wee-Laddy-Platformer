@@ -146,7 +146,6 @@ public class Enemy : MonoBehaviour
 
                 Vector3 bulletSpawnPoint = new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5);
                 Vector3 shotTarget = targetToChase.transform.position;
-                shotTarget.z = 0;
 
                 Vector3 travelDirection;
                 travelDirection.x = shotTarget.x - bulletSpawnPoint.x;

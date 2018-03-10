@@ -99,39 +99,22 @@ public class FarEnemy : MonoBehaviour
                 //Fire Projectile at player
                 var fireDirection = controller.collisions.faceDir;
 
-                Vector3 bulletSpawnPoint = new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, gameObject.transform.position.z);
+                Vector3 bulletSpawnPoint = gameObject.transform.position;
                 Vector3 shotTarget = targetToChase.transform.position;
-                shotTarget.z = 0;
+                //shotTarget.z = 5;
 
-                Vector3 travelDirection;
-                travelDirection.x = shotTarget.x - bulletSpawnPoint.x;
-                travelDirection.y = shotTarget.y - bulletSpawnPoint.y;
-                //z direction needs to be altered to hit background targets, 0 for foreground targets
-                travelDirection.z = bulletSpawnPoint.z;
-                travelDirection.Normalize();
+                GameObject thisProjectile = Instantiate(projectileType, bulletSpawnPoint, Quaternion.identity);
+                thisProjectile.transform.parent = enemyFarBulletParentContainer.transform;
 
-                //50 is bullet speed * 5 here, pull from enemy shot type in the future
-                RaycastHit2D wHit = Physics2D.Raycast(gameObject.transform.position, travelDirection, Time.deltaTime * 50, controller.collisionMask);
-                if (!wHit)
-                {
-                    GameObject thisProjectile = Instantiate(projectileType, bulletSpawnPoint, Quaternion.identity);
-                    thisProjectile.transform.parent = enemyFarBulletParentContainer.transform;
+                ProjectileController projectileScript = thisProjectile.GetComponent<ProjectileController>();
 
-                    ProjectileController projectileScript = thisProjectile.GetComponent<ProjectileController>();
+                projectileScript.targetCoords = shotTarget;
+                projectileScript.playerBoxCollider = playerCollider;
 
-                    projectileScript.targetCoords = shotTarget;
+                objectAudio.PlayOneShot(shotSound, 0.3f);
 
-                    objectAudio.PlayOneShot(shotSound, 0.3f);
-
-                    readyToFire = false;
-                    StartCoroutine(FireTimer(shootDelay));
-                }
-                else
-                {
-                    //Try to shoot again with a miniscule timer
-                    readyToFire = false;
-                    StartCoroutine(FireTimer(0.5f));
-                }
+                readyToFire = false;
+                StartCoroutine(FireTimer(shootDelay));
             }
         }
         else
