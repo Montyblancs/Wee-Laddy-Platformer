@@ -24,6 +24,9 @@ public class ProjectileController : MonoBehaviour
     public GameObject bulletCasing;
     public GameObject casingContainer;
 
+    public GameObject incomingWarningObject;
+    GameObject childWarningObject = null;
+
     // Use this for initialization
     void Start()
     {
@@ -37,6 +40,12 @@ public class ProjectileController : MonoBehaviour
         //z direction needs to be altered to hit background targets, 0 for foreground targets
         travelDirection.z = targetCoords.z - spawnCoords.z;
         travelDirection.Normalize();
+
+        if (isEnemyBullet && spawnCoords.z >= 6)
+        {
+            //Far enemy shooting, spawn indicator at destination
+            childWarningObject = Instantiate(incomingWarningObject, targetCoords, Quaternion.identity);
+        }
     }
 
     //Seperate function so casingContainer can be set before creating casing
@@ -56,7 +65,7 @@ public class ProjectileController : MonoBehaviour
             //If bullet isn't visible, destroy it.
             //http://answers.unity3d.com/questions/8003/how-can-i-know-if-a-gameobject-is-seen-by-a-partic.html
             Vector3 inView = Camera.main.WorldToViewportPoint(gameObject.transform.position);
-            if (inView.x < -0.1 || inView.x > 1.1 || inView.y < -0.1 || inView.y > 1.1) { Destroy(gameObject); }
+            if (inView.x < -0.1 || inView.x > 1.1 || inView.y < -0.1 || inView.y > 1.1) { DestroyThisBullet(); }
 
             if (gameObject.transform.position.z == 5)
             {
@@ -88,7 +97,7 @@ public class ProjectileController : MonoBehaviour
                         {
                             Destroy(eHit.transform.gameObject);
                         }
-                        Destroy(gameObject);
+                        DestroyThisBullet();
                     }
                 }
 
@@ -115,7 +124,7 @@ public class ProjectileController : MonoBehaviour
                     //objectAudio.panStereo = inView.x;
                     //objectAudio.PlayOneShot(pickedSound, 0.1f);
                     //rend.enabled = false;
-                    Destroy(gameObject);
+                    DestroyThisBullet();
                     Destroy(eHit2.transform.gameObject);
                 }
 
@@ -125,7 +134,7 @@ public class ProjectileController : MonoBehaviour
                     objectAudio.panStereo = inView.x;
                     objectAudio.PlayOneShot(pickedSound, 0.1f);
                     rend.enabled = false;
-                    Destroy(gameObject, pickedSound.length);
+                    DestroyThisBullet(pickedSound.length);
                 }
 
                 //initial - 0.25 0.25 1
@@ -148,7 +157,7 @@ public class ProjectileController : MonoBehaviour
                             }
 
                         }
-                        Destroy(gameObject);
+                        DestroyThisBullet();
                     }
                     if (newScale > 0.25f)
                     {
@@ -177,7 +186,7 @@ public class ProjectileController : MonoBehaviour
             stats.damage(this.damageAmount);
         }
         // remove this game objext
-        Destroy(gameObject, pickedSound.length);
+        DestroyThisBullet(pickedSound.length);
     }
 
     //For when a background enemy bullet passes a collision check w/ player
@@ -197,6 +206,15 @@ public class ProjectileController : MonoBehaviour
         if (coll.gameObject.layer == 8)
         {
             Debug.Log("hit layer 8");
+        }
+    }
+
+    void DestroyThisBullet(float Delay = 0)
+    {
+        Destroy(gameObject, Delay);
+        if (childWarningObject != null)
+        {
+            Destroy(childWarningObject);
         }
     }
 

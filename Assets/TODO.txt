@@ -9,12 +9,15 @@ Refine camera movements and control, where possible.
 Zoom out the camera a bit, let the player see more.
 Apply a small time window where input doesn't effect player movement after a wall jump, to provide slightly easier max-distance wall jumping.
 fix bug where the player appears to jitter ever so slightly while moving on platforms.
-Decide on a sprite animation system
-	-2D : indipendent arms following cusor, 8-way body.
-	-3D : full sprites, no aiming animation really needed
-Improve HUD, adding some indication of your current weapon/ammo etc.
+Decide on a sprite animation system 
+  -2D : indipendent arms following cusor, 8-way body. 
+  -3D : full sprites, no aiming animation really needed 
+Improve HUD, adding some indication of your current weapon/ammo etc. 
+Convert all timers into CoRoutines
+Disable renderer on platforms not in camera view
 
 -Bugfixes
+Unexplicable chugging during testing. Not sure why.
 Shotgun spread on flat plane is dependent on cursor distance from player. Make this indipendent.
 Get the z position of an object under the cursor when firing at the background to ensure the bullet travels accurately
 	-This will allow for objects positioned at multiple different z positions for layering
