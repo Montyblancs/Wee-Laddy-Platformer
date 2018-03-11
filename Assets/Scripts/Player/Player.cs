@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -92,12 +93,27 @@ public class Player : MonoBehaviour
     // holds a list of all active coroutines started by this object
     private List<string> activeCoroutines = new List<string> { };
 
+    // -- variables for UI HUD elements --
+    // an image in the UI to reflect show what weapon the player has
+    [SerializeField] 
+    public Image weaponImage;
+    // a sprite for when the player has no weapon pickup active, fetch on awake from weaponImage
+    private Sprite defaultWeaponImage;
+    // an image in the UI to reflect show what weapon the player has
+    [SerializeField] 
+    public Text ammoDisplay;
+
     void Start()
     {
         // get essential components
         controller = GetComponent<Controller2D>();
         stats = GetComponent<CharacterStats>();
         render = GetComponent<Renderer>();
+
+        // see if we can fetch the default weapon sprite from the ui image
+        if (weaponImage) {
+            defaultWeaponImage = weaponImage.sprite;
+        }
 
         // set the boolean enablers to default state
         statCanMove = true;
@@ -406,8 +422,12 @@ public class Player : MonoBehaviour
             if (specialRoundsLeft != -1)
                 specialRoundsLeft--;
 
-            if (specialRoundsLeft == 0)
+            if (specialRoundsLeft == 0 && this.projectileType != this.defaultProjectileType) {
                 ProjectileChange(defaultProjectileType, -1, 0, 0);
+            } else {
+                // update the ui after each shot
+                this.updateWeaponUI();
+            }
         }
 
     }
@@ -461,8 +481,12 @@ public class Player : MonoBehaviour
             if (specialRoundsLeft != -1)
                 specialRoundsLeft--;
 
-            if (specialRoundsLeft == 0)
+            if (specialRoundsLeft == 0 && this.projectileType != this.defaultProjectileType) {
                 ProjectileChange(defaultProjectileType, -1, 0, 0);
+            } else {
+                // update the ui after each shot
+                this.updateWeaponUI();
+            }
         }
     }
 
@@ -500,6 +524,24 @@ public class Player : MonoBehaviour
         specialFireRate = fireRate;
         thisProjectileController = projectileType.GetComponent<ProjectileController>();
         shotSound = thisProjectileController.shotSound;
+        // swap the sprite to the default weapon image if needed
+        if (this.weaponImage && this.projectileType == this.defaultProjectileType && this.weaponImage.sprite != this.defaultWeaponImage) {
+            // switch ui image to default weapon
+            this.weaponImage.sprite = this.defaultWeaponImage;
+            this.weaponImage.rectTransform.sizeDelta = new Vector2(defaultWeaponImage.rect.width, defaultWeaponImage.rect.height);
+            // remove the ammo display
+            ammoDisplay.text = null;
+        }
+        this.updateWeaponUI();
+    }
+
+    public void ProjectileChange(GameObject bulletType, short numShots, byte fireType, float fireRate, Sprite iconForHUD)
+    {
+        // set the icon in the UI first
+        this.weaponImage.sprite = iconForHUD;
+        this.weaponImage.rectTransform.sizeDelta = new Vector2(iconForHUD.rect.width, iconForHUD.rect.height);
+        // then pass to the main function for changing weapons
+        this.ProjectileChange(bulletType, numShots, fireType, fireRate);
     }
 
     //Movement
@@ -632,6 +674,15 @@ public class Player : MonoBehaviour
         if (this.stats)
         {
             this.stats.revive();
+        }
+    }
+
+    // make sure the ui reflects the current weapon ammo.
+    public void updateWeaponUI() 
+    {
+        // check if we need to update the ammo indicator.
+        if (this.specialRoundsLeft > 0 && this.ammoDisplay) {
+            this.ammoDisplay.text = this.specialRoundsLeft.ToString();
         }
     }
 }
