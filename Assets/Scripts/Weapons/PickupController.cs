@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class PickupController : MonoBehaviour {
 
@@ -11,6 +12,8 @@ public class PickupController : MonoBehaviour {
     //2 - Shotgun (Once on down, has fire delay)
     public byte fireType;
     public float fireRate;
+    // sprite that will show up in the HUD when picked up
+    public Sprite iconForHUD;
 
     Renderer rend;
 
@@ -36,7 +39,7 @@ public class PickupController : MonoBehaviour {
             if(thisCollider.bounds.Intersects(playerCollider.bounds))
             {
                 //Do Pickup
-                playerScript.ProjectileChange(giveBulletType, numOfShots, fireType, fireRate);
+                playerScript.ProjectileChange(giveBulletType, numOfShots, fireType, fireRate, iconForHUD);
                 Destroy(gameObject);
             }
         }
