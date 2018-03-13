@@ -20,11 +20,15 @@ public class Player : MonoBehaviour
     public float MoveSpeed
     {
         get { return (stats ? stats.SPD : moveSpeed); }
-        set {
+        set
+        {
             // if characterstats is fetched, set the stat.
-            if (stats) {
+            if (stats)
+            {
                 stats.SPD = value;
-            } else {
+            }
+            else
+            {
                 this.moveSpeed = value;
             }
         }
@@ -95,13 +99,15 @@ public class Player : MonoBehaviour
 
     // -- variables for UI HUD elements --
     // an image in the UI to reflect show what weapon the player has
-    [SerializeField] 
+    [SerializeField]
     public Image weaponImage;
     // a sprite for when the player has no weapon pickup active, fetch on awake from weaponImage
     private Sprite defaultWeaponImage;
     // an image in the UI to reflect show what weapon the player has
-    [SerializeField] 
+    [SerializeField]
     public Text ammoDisplay;
+
+    public Animator playerAnimator;
 
     void Start()
     {
@@ -109,9 +115,11 @@ public class Player : MonoBehaviour
         controller = GetComponent<Controller2D>();
         stats = GetComponent<CharacterStats>();
         render = GetComponent<Renderer>();
+        playerAnimator = GetComponent<Animator>();
 
         // see if we can fetch the default weapon sprite from the ui image
-        if (weaponImage) {
+        if (weaponImage)
+        {
             defaultWeaponImage = weaponImage.sprite;
         }
 
@@ -147,6 +155,9 @@ public class Player : MonoBehaviour
         CalculateVelocity();
         HandleWallSliding();
 
+        //Animator
+        SetAnimatorParameters();
+
         controller.Move(velocity * Time.deltaTime, directionalInput);
 
         if (controller.collisions.above || controller.collisions.below)
@@ -165,6 +176,23 @@ public class Player : MonoBehaviour
         //    dodgeTimer -= Time.deltaTime;
         //else if (controller.isDodging && dodgeTimer <= 0)
         //    ResetDodgeFlag();
+    }
+
+    private void SetAnimatorParameters()
+    {
+        if (velocity.x >= 0.5f)
+        {
+            playerAnimator.SetInteger("HorizonalMoveDirection", 1);
+        }
+        else if (velocity.x <= -0.5f)
+        {
+            playerAnimator.SetInteger("HorizonalMoveDirection", -1);
+        }
+        else
+        {
+            playerAnimator.SetInteger("HorizonalMoveDirection", 0);
+        }
+
     }
 
     //Coroutine Timers
@@ -422,9 +450,12 @@ public class Player : MonoBehaviour
             if (specialRoundsLeft != -1)
                 specialRoundsLeft--;
 
-            if (specialRoundsLeft == 0 && this.projectileType != this.defaultProjectileType) {
+            if (specialRoundsLeft == 0 && this.projectileType != this.defaultProjectileType)
+            {
                 ProjectileChange(defaultProjectileType, -1, 0, 0);
-            } else {
+            }
+            else
+            {
                 // update the ui after each shot
                 this.updateWeaponUI();
             }
@@ -481,9 +512,12 @@ public class Player : MonoBehaviour
             if (specialRoundsLeft != -1)
                 specialRoundsLeft--;
 
-            if (specialRoundsLeft == 0 && this.projectileType != this.defaultProjectileType) {
+            if (specialRoundsLeft == 0 && this.projectileType != this.defaultProjectileType)
+            {
                 ProjectileChange(defaultProjectileType, -1, 0, 0);
-            } else {
+            }
+            else
+            {
                 // update the ui after each shot
                 this.updateWeaponUI();
             }
@@ -525,7 +559,8 @@ public class Player : MonoBehaviour
         thisProjectileController = projectileType.GetComponent<ProjectileController>();
         shotSound = thisProjectileController.shotSound;
         // swap the sprite to the default weapon image if needed
-        if (this.weaponImage && this.projectileType == this.defaultProjectileType && this.weaponImage.sprite != this.defaultWeaponImage) {
+        if (this.weaponImage && this.projectileType == this.defaultProjectileType && this.weaponImage.sprite != this.defaultWeaponImage)
+        {
             // switch ui image to default weapon
             this.weaponImage.sprite = this.defaultWeaponImage;
             this.weaponImage.rectTransform.sizeDelta = new Vector2(defaultWeaponImage.rect.width, defaultWeaponImage.rect.height);
@@ -593,7 +628,8 @@ public class Player : MonoBehaviour
         float transitionTime = (controller.collisions.below) ? accelerationTimeGrounded : accelerationTimeAirborne;
         velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref accelerationX, transitionTime);
         // if its close enough, make it target value, cause for some reason transitionTime doesn't do that.
-        if (Mathf.Abs(accelerationX) < 0.001F) {
+        if (Mathf.Abs(accelerationX) < 0.001F)
+        {
             accelerationX = 0F;
             velocity.x = targetVelocityX;
         }
@@ -631,8 +667,10 @@ public class Player : MonoBehaviour
                 appliedCondition = stats.Condition;
                 // wait a few seconds before being able to live or die again
                 yield return new WaitForSeconds(2f);
-            // if they aren't dead and they previously were, well... bring um back.
-            } else if (stats.isAlive() && appliedCondition == ConditionType.DEAD) {
+                // if they aren't dead and they previously were, well... bring um back.
+            }
+            else if (stats.isAlive() && appliedCondition == ConditionType.DEAD)
+            {
                 // start by making sure the character is alive according to the CharacterStats
                 if (stats && !stats.isAlive())
                 {
@@ -649,7 +687,8 @@ public class Player : MonoBehaviour
                 yield return new WaitForSeconds(2f);
             }
             // Make player speed reflect the speed stat
-            if (this.moveSpeed != stats.SPD) {
+            if (this.moveSpeed != stats.SPD)
+            {
                 this.moveSpeed = stats.SPD;
             }
             // only poll on a set interval, for now every tenth of a second
@@ -678,10 +717,11 @@ public class Player : MonoBehaviour
     }
 
     // make sure the ui reflects the current weapon ammo.
-    public void updateWeaponUI() 
+    public void updateWeaponUI()
     {
         // check if we need to update the ammo indicator.
-        if (this.specialRoundsLeft > 0 && this.ammoDisplay) {
+        if (this.specialRoundsLeft > 0 && this.ammoDisplay)
+        {
             this.ammoDisplay.text = this.specialRoundsLeft.ToString();
         }
     }
