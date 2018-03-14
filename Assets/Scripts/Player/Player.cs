@@ -180,19 +180,9 @@ public class Player : MonoBehaviour
 
     private void SetAnimatorParameters()
     {
-        if (velocity.x >= 0.5f)
-        {
-            playerAnimator.SetInteger("HorizonalMoveDirection", 1);
-        }
-        else if (velocity.x <= -0.5f)
-        {
-            playerAnimator.SetInteger("HorizonalMoveDirection", -1);
-        }
-        else
-        {
-            playerAnimator.SetInteger("HorizonalMoveDirection", 0);
-        }
-
+		playerAnimator.SetFloat("x_velocity", velocity.x);
+		playerAnimator.SetFloat("y_velocity", velocity.y);
+		playerAnimator.SetBool("on_ground", controller.collisions.below);
     }
 
     //Coroutine Timers
@@ -277,16 +267,19 @@ public class Player : MonoBehaviour
             {
                 velocity.x = -wallDirX * wallJumpClimb.x;
                 velocity.y = wallJumpClimb.y;
+				playerAnimator.SetTrigger ("start_jump");
             }
             else if (directionalInput.x == 0)
             {
                 velocity.x = -wallDirX * wallJumpOff.x;
                 velocity.y = wallJumpOff.y;
+				playerAnimator.SetTrigger ("start_jump");
             }
             else
             {
                 velocity.x = -wallDirX * wallLeap.x;
                 velocity.y = wallLeap.y;
+				playerAnimator.SetTrigger ("start_jump");
             }
         }
         if (controller.collisions.below)
@@ -297,11 +290,13 @@ public class Player : MonoBehaviour
                 { // not jumping against max slope
                     velocity.y = maxJumpVelocity * controller.collisions.slopeNormal.y;
                     velocity.x = maxJumpVelocity * controller.collisions.slopeNormal.x;
+					playerAnimator.SetTrigger ("start_jump");
                 }
             }
             else
             {
                 velocity.y = maxJumpVelocity;
+				playerAnimator.SetTrigger ("start_jump");
             }
         }
     }
