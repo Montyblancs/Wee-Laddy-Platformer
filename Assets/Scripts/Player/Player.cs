@@ -91,7 +91,9 @@ public class Player : MonoBehaviour
     static byte DIR_FAR = 1;
 
     // variables to determine what the player is currently able to do
+    [HideInInspector]
     public bool statCanMove = true;
+    [HideInInspector]
     public bool statCanFire = true;
 
     // holds a list of all active coroutines started by this object
@@ -107,7 +109,10 @@ public class Player : MonoBehaviour
     [SerializeField]
     public Text ammoDisplay;
 
+    [HideInInspector]
     public Animator playerAnimator;
+    [HideInInspector]
+    public SpriteRenderer playerSpriteRender;
 
     void Start()
     {
@@ -116,6 +121,7 @@ public class Player : MonoBehaviour
         stats = GetComponent<CharacterStats>();
         render = GetComponent<Renderer>();
         playerAnimator = GetComponent<Animator>();
+        playerSpriteRender = GetComponent<SpriteRenderer>();
 
         // see if we can fetch the default weapon sprite from the ui image
         if (weaponImage)
@@ -180,9 +186,10 @@ public class Player : MonoBehaviour
 
     private void SetAnimatorParameters()
     {
-		playerAnimator.SetFloat("x_velocity", velocity.x);
-		playerAnimator.SetFloat("y_velocity", velocity.y);
-		playerAnimator.SetBool("on_ground", controller.collisions.below);
+        playerAnimator.SetFloat("x_velocity", Mathf.Abs(velocity.x));
+        playerAnimator.SetFloat("y_velocity", velocity.y);
+        playerAnimator.SetBool("on_ground", controller.collisions.below);
+        playerSpriteRender.flipX = (controller.collisions.faceDir != 1) ? true : false;
     }
 
     //Coroutine Timers
@@ -267,19 +274,19 @@ public class Player : MonoBehaviour
             {
                 velocity.x = -wallDirX * wallJumpClimb.x;
                 velocity.y = wallJumpClimb.y;
-				playerAnimator.SetTrigger ("start_jump");
+                playerAnimator.SetTrigger("start_jump");
             }
             else if (directionalInput.x == 0)
             {
                 velocity.x = -wallDirX * wallJumpOff.x;
                 velocity.y = wallJumpOff.y;
-				playerAnimator.SetTrigger ("start_jump");
+                playerAnimator.SetTrigger("start_jump");
             }
             else
             {
                 velocity.x = -wallDirX * wallLeap.x;
                 velocity.y = wallLeap.y;
-				playerAnimator.SetTrigger ("start_jump");
+                playerAnimator.SetTrigger("start_jump");
             }
         }
         if (controller.collisions.below)
@@ -290,13 +297,13 @@ public class Player : MonoBehaviour
                 { // not jumping against max slope
                     velocity.y = maxJumpVelocity * controller.collisions.slopeNormal.y;
                     velocity.x = maxJumpVelocity * controller.collisions.slopeNormal.x;
-					playerAnimator.SetTrigger ("start_jump");
+                    playerAnimator.SetTrigger("start_jump");
                 }
             }
             else
             {
                 velocity.y = maxJumpVelocity;
-				playerAnimator.SetTrigger ("start_jump");
+                playerAnimator.SetTrigger("start_jump");
             }
         }
     }
@@ -330,14 +337,7 @@ public class Player : MonoBehaviour
                 //Create a projectile that travels towards the current position of the mouse cursor.
                 //gameObject refers to the parent object of this script
                 GameObject thisProjectile = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, gameObject.transform.position.z), Quaternion.identity);
-                if (shotDir == DIR_FAR)
-                {
-                    thisProjectile.transform.parent = farBulletParentContainer.transform;
-                }
-                else
-                {
-                    thisProjectile.transform.parent = nearBulletParentContainer.transform;
-                }
+                thisProjectile.transform.parent = (shotDir == DIR_FAR) ? farBulletParentContainer.transform : nearBulletParentContainer.transform;
                 ProjectileController projectileScript = thisProjectile.GetComponent<ProjectileController>();
                 projectileScript.casingContainer = casingContainer;
                 projectileScript.CreateCasing(new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5));
@@ -345,15 +345,9 @@ public class Player : MonoBehaviour
                 //Mouse position is not equal to position in game world, just the position on the screen.
                 //Need game world equivilent position for this coord.
                 Vector3 shotTarget = Input.mousePosition;
-                if (shotDir == DIR_NEAR)
-                {
-                    shotTarget.z = 5;
-                }
-                else
-                {
-                    //Should we get the z index of an object under the cursor at the time of click for an accurate target?
-                    shotTarget.z = 16;
-                }
+
+                //Should we get the z index of an object under the cursor at the time of click for an accurate target?
+                shotTarget.z = (shotDir == DIR_NEAR) ? 5 : 16;
 
                 projectileScript.targetCoords = playerCam.ScreenToWorldPoint(shotTarget);
             }
@@ -474,14 +468,7 @@ public class Player : MonoBehaviour
             //Create a projectile that travels towards the current position of the mouse cursor.
             //gameObject refers to the parent object of this script
             GameObject thisProjectile = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
-            if (shotDir == DIR_FAR)
-            {
-                thisProjectile.transform.parent = farBulletParentContainer.transform;
-            }
-            else
-            {
-                thisProjectile.transform.parent = nearBulletParentContainer.transform;
-            }
+            thisProjectile.transform.parent = (shotDir == DIR_FAR) ? farBulletParentContainer.transform : nearBulletParentContainer.transform;
             ProjectileController projectileScript = thisProjectile.GetComponent<ProjectileController>();
             projectileScript.casingContainer = casingContainer;
             projectileScript.CreateCasing(new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5));
@@ -489,14 +476,7 @@ public class Player : MonoBehaviour
             //Mouse position is not equal to position in game world, just the position on the screen.
             //Need game world equivilent position for this coord.
             Vector3 shotTarget = Input.mousePosition;
-            if (shotDir == DIR_NEAR)
-            {
-                shotTarget.z = 5;
-            }
-            else
-            {
-                shotTarget.z = 16;
-            }
+            shotTarget.z = (shotDir == DIR_NEAR) ? 5 : 16;
 
             projectileScript.targetCoords = playerCam.ScreenToWorldPoint(shotTarget);
 
