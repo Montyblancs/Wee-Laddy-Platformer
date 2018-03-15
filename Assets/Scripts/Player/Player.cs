@@ -44,8 +44,6 @@ public class Player : MonoBehaviour
     public sbyte dodgeLayer;
     public sbyte playerLayer;
     public float dodgeCooldown = 3f;
-    public Material dodgeMaterial;
-    public Material baseMaterial;
     public float dodgeDuration = 0.2f;
 
     public GameObject farBulletParentContainer;
@@ -177,11 +175,6 @@ public class Player : MonoBehaviour
                 velocity.y = 0;
             }
         }
-
-        //if (dodgeTimer > 0)
-        //    dodgeTimer -= Time.deltaTime;
-        //else if (controller.isDodging && dodgeTimer <= 0)
-        //    ResetDodgeFlag();
     }
 
     private void SetAnimatorParameters()
@@ -210,11 +203,11 @@ public class Player : MonoBehaviour
         {
             controller.isDodging = true;
             gameObject.layer = dodgeLayer;
-            render.material = dodgeMaterial;
+			playerAnimator.SetTrigger("start_slide");
             yield return new WaitForSeconds(duration);
             controller.isDodging = false;
             gameObject.layer = playerLayer;
-            render.material = baseMaterial;
+			playerAnimator.SetTrigger("end_slide");
         }
     }
 
@@ -640,6 +633,8 @@ public class Player : MonoBehaviour
                 statCanFire = false;
                 // set the new applied condition
                 appliedCondition = stats.Condition;
+				//Throw Animator trigger
+				playerAnimator.SetTrigger("has_died");
                 // wait a few seconds before being able to live or die again
                 yield return new WaitForSeconds(2f);
                 // if they aren't dead and they previously were, well... bring um back.
