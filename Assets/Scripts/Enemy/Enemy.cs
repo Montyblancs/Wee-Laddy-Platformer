@@ -47,6 +47,11 @@ public class Enemy : MonoBehaviour
 
     Renderer rend;
 
+	[HideInInspector]
+	public Animator enemyAnimator;
+	[HideInInspector]
+	public SpriteRenderer enemySpriteRender;
+
     void Start()
     {
         controller = GetComponent<EnemyController2D>();
@@ -65,6 +70,9 @@ public class Enemy : MonoBehaviour
 
         thisCollider = GetComponent<BoxCollider2D>();
         playerCollider = targetToChase.GetComponent<BoxCollider2D>();
+
+		enemyAnimator = GetComponent<Animator>();
+		enemySpriteRender = GetComponent<SpriteRenderer>();
     }
 
     void Update()
@@ -135,48 +143,9 @@ public class Enemy : MonoBehaviour
                 }
             }
 
-            if (!fireTimerStarted && !readyToFire)
-            {
-                StartCoroutine(FireTimer(shootDelay));
-            }
-            else if (readyToFire)
-            {
-                //Fire Projectile at player
-                var fireDirection = controller.collisions.faceDir;
+			TryToFire ();
 
-                Vector3 bulletSpawnPoint = new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5);
-                Vector3 shotTarget = targetToChase.transform.position;
-
-                Vector3 travelDirection;
-                travelDirection.x = shotTarget.x - bulletSpawnPoint.x;
-                travelDirection.y = shotTarget.y - bulletSpawnPoint.y;
-                //z direction needs to be altered to hit background targets, 0 for foreground targets
-                travelDirection.z = bulletSpawnPoint.z;
-                travelDirection.Normalize();
-
-                //50 is bullet speed * 5 here, pull from enemy shot type in the future
-                RaycastHit2D wHit = Physics2D.Raycast(gameObject.transform.position, travelDirection, Time.deltaTime * 50, controller.collisionMask);
-                if (!wHit)
-                {
-                    GameObject thisProjectile = Instantiate(projectileType, bulletSpawnPoint, Quaternion.identity);
-                    thisProjectile.transform.parent = enemyNearBulletParentContainer.transform;
-
-                    ProjectileController projectileScript = thisProjectile.GetComponent<ProjectileController>();
-
-                    projectileScript.targetCoords = shotTarget;
-
-                    objectAudio.PlayOneShot(shotSound, 0.3f);
-
-                    readyToFire = false;
-                    StartCoroutine(FireTimer(shootDelay));
-                }
-                else
-                {
-                    //Try to shoot again with a miniscule timer
-                    readyToFire = false;
-                    StartCoroutine(FireTimer(0.5f));
-                }
-            }
+			SetAnimatorParameters();
         }
         else
         {
@@ -188,6 +157,60 @@ public class Enemy : MonoBehaviour
             }
         }
     }
+
+	void TryToFire()
+	{
+		if (!fireTimerStarted && !readyToFire)
+		{
+			StartCoroutine(FireTimer(shootDelay));
+		}
+		else if (readyToFire)
+		{
+			//Fire Projectile at player
+			var fireDirection = controller.collisions.faceDir;
+
+			Vector3 bulletSpawnPoint = new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5);
+			Vector3 shotTarget = targetToChase.transform.position;
+
+			Vector3 travelDirection;
+			travelDirection.x = shotTarget.x - bulletSpawnPoint.x;
+			travelDirection.y = shotTarget.y - bulletSpawnPoint.y;
+			//z direction needs to be altered to hit background targets, 0 for foreground targets
+			travelDirection.z = bulletSpawnPoint.z;
+			travelDirection.Normalize();
+
+			//50 is bullet speed * 5 here, pull from enemy shot type in the future
+			RaycastHit2D wHit = Physics2D.Raycast(gameObject.transform.position, travelDirection, Time.deltaTime * 50, controller.collisionMask);
+			if (!wHit)
+			{
+				GameObject thisProjectile = Instantiate(projectileType, bulletSpawnPoint, Quaternion.identity);
+				thisProjectile.transform.parent = enemyNearBulletParentContainer.transform;
+
+				ProjectileController projectileScript = thisProjectile.GetComponent<ProjectileController>();
+
+				projectileScript.targetCoords = shotTarget;
+
+				objectAudio.PlayOneShot(shotSound, 0.3f);
+
+				readyToFire = false;
+				StartCoroutine(FireTimer(shootDelay));
+			}
+			else
+			{
+				//Try to shoot again with a miniscule timer
+				readyToFire = false;
+				StartCoroutine(FireTimer(0.5f));
+			}
+		}
+	}
+
+	private void SetAnimatorParameters()
+	{
+		enemyAnimator.SetFloat("x_velocity", Mathf.Abs(velocity.x));
+		enemyAnimator.SetFloat("y_velocity", velocity.y);
+		enemyAnimator.SetBool("on_ground", controller.collisions.below);
+		enemySpriteRender.flipX = (controller.collisions.faceDir != 1) ? true : false;
+	}
 
     private IEnumerator FireTimer(float duration)
     {
