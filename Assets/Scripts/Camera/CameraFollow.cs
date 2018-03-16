@@ -115,7 +115,7 @@ public class CameraFollow : MonoBehaviour
                 mouseX = Screen.width;
             }
 
-            Vector2 DistanceFromCenter = new Vector2(mouseX - (Screen.width / 2), Input.mousePosition.y - (Screen.height / 2));
+            //Vector2 DistanceFromCenter = new Vector2(mouseX - (Screen.width / 2), Input.mousePosition.y - (Screen.height / 2));
             //current / total results in 0-1f range
             //Left side = current/midpoint | Right side = current/Screen width
             float minX = targetBounds.min.x;

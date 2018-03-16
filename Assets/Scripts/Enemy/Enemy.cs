@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(EnemyController2D))]
 public class Enemy : MonoBehaviour
@@ -11,15 +12,17 @@ public class Enemy : MonoBehaviour
     public GameObject targetToChase;
     public float accelerationTimeAirborne = .2f;
     public float accelerationTimeGrounded = .1f;
-    public float moveSpeed = 6;
+    private float moveSpeed = 6;
     public float shootDelay = 5;
     public GameObject projectileType;
     public GameObject enemyNearBulletParentContainer;
     public Camera mainCam;
     public float damageOnTouch;
+	public float deadBodyLastTime;
 
     bool readyToFire;
     bool fireTimerStarted;
+	bool DeadBodyTimerStarted;
     //float timeToWallUnstick;
 
     AudioSource objectAudio;
@@ -52,6 +55,15 @@ public class Enemy : MonoBehaviour
 	[HideInInspector]
 	public SpriteRenderer enemySpriteRender;
 
+	CharacterStats stats;
+	[HideInInspector]
+	public bool statCanMove = true;
+	[HideInInspector]
+	public bool statCanFire = true;
+
+	// holds a list of all active coroutines started by this object
+	private List<string> activeCoroutines = new List<string> { };
+
     void Start()
     {
         controller = GetComponent<EnemyController2D>();
@@ -66,6 +78,7 @@ public class Enemy : MonoBehaviour
 
         readyToFire = false;
         fireTimerStarted = false;
+		DeadBodyTimerStarted = false;
         objectAudio = GetComponent<AudioSource>();
 
         thisCollider = GetComponent<BoxCollider2D>();
@@ -73,62 +86,70 @@ public class Enemy : MonoBehaviour
 
 		enemyAnimator = GetComponent<Animator>();
 		enemySpriteRender = GetComponent<SpriteRenderer>();
+
+		stats = GetComponent<CharacterStats>();
+
+		// start checking the player stats so we can have the player reflect the condition
+		StartCoroutine("MonitorCondition");
     }
 
     void Update()
     {
         Vector3 inView = Camera.main.WorldToViewportPoint(gameObject.transform.position);
-        if (inView.x > -0.15f && inView.x < 1.15f && inView.y > -0.15f && inView.y < 1.15f && !isDying)
+		if (inView.x > -0.15f && inView.x < 1.15f && inView.y > -0.15f && inView.y < 1.15f)
         {
             rend.enabled = true;
             CalculateVelocity();
-            Vector2 TowardsPlayer = new Vector2(0, 0);
+			if (!stats.isDead()){
+				Vector2 TowardsPlayer = new Vector2(0, 0);
 
-            if (targetToChase.transform.position.x < gameObject.transform.position.x)
-            {
-                if (Vector3.Distance(targetToChase.transform.position, gameObject.transform.position) >= 6f)
-                {
-                    TowardsPlayer.x = -1f;
-                }
-                else if (Vector3.Distance(targetToChase.transform.position, gameObject.transform.position) <= 4f)
-                {
-                    TowardsPlayer.x = 1f;
-                    //Check if player is touching
-                    if (thisCollider.bounds.Intersects(playerCollider.bounds))
-                    {
-                        CharacterStats stats;
-                        if (stats = targetToChase.GetComponent<CharacterStats>())
-                        {
-                            //Needs invuln state
-                            stats.damage(damageOnTouch);
-                        }
-                    }
-                }
-            }
-            else if (targetToChase.transform.position.x >= gameObject.transform.position.x)
-            {
-                if (Vector3.Distance(targetToChase.transform.position, gameObject.transform.position) >= 6f)
-                {
-                    TowardsPlayer.x = 1f;
-                }
-                else if (Vector3.Distance(targetToChase.transform.position, gameObject.transform.position) <= 4f)
-                {
-                    TowardsPlayer.x = -1f;
-                    //Check if player is touching
-                    if (thisCollider.bounds.Intersects(playerCollider.bounds))
-                    {
-                        CharacterStats stats;
-                        if (stats = targetToChase.GetComponent<CharacterStats>())
-                        {
-                            //Needs invuln state
-                            stats.damage(damageOnTouch);
-                        }
-                    }
-                }
-            }
+				if (targetToChase.transform.position.x < gameObject.transform.position.x)
+				{
+					if (Vector3.Distance(targetToChase.transform.position, gameObject.transform.position) >= 6f)
+					{
+						TowardsPlayer.x = -1f;
+					}
+					else if (Vector3.Distance(targetToChase.transform.position, gameObject.transform.position) <= 4f)
+					{
+						TowardsPlayer.x = 1f;
+						//Check if player is touching
+						if (thisCollider.bounds.Intersects(playerCollider.bounds))
+						{
+							CharacterStats stats;
+							if (stats = targetToChase.GetComponent<CharacterStats>())
+							{
+								//Needs invuln state
+								stats.damage(damageOnTouch);
+							}
+						}
+					}
+				}
+				else if (targetToChase.transform.position.x >= gameObject.transform.position.x)
+				{
+					if (Vector3.Distance(targetToChase.transform.position, gameObject.transform.position) >= 6f)
+					{
+						TowardsPlayer.x = 1f;
+					}
+					else if (Vector3.Distance(targetToChase.transform.position, gameObject.transform.position) <= 4f)
+					{
+						TowardsPlayer.x = -1f;
+						//Check if player is touching
+						if (thisCollider.bounds.Intersects(playerCollider.bounds))
+						{
+							CharacterStats stats;
+							if (stats = targetToChase.GetComponent<CharacterStats>())
+							{
+								//Needs invuln state
+								stats.damage(damageOnTouch);
+							}
+						}
+					}
+				}
 
-            SetDirectionalInput(TowardsPlayer);
-
+				SetDirectionalInput(TowardsPlayer);
+				TryToFire ();
+			}
+				
             controller.Move(velocity * Time.deltaTime, directionalInput);
 
             if (controller.collisions.above || controller.collisions.below)
@@ -143,20 +164,118 @@ public class Enemy : MonoBehaviour
                 }
             }
 
-			TryToFire ();
-
 			SetAnimatorParameters();
         }
         else
         {
             rend.enabled = false;
-            if (isDying)
-            {
-                BoxCollider2D thisBox = gameObject.GetComponent<BoxCollider2D>();
-                thisBox.enabled = false;
-            }
         }
     }
+
+	public void OnEnable()
+	{
+		// start the ConditionMonitor Coroutine if its not already started.
+		if (!this.activeCoroutines.Contains("MonitorCondition"))
+		{
+			// if stats component has not been fetched, don't bother.
+			if (stats)
+			{
+				StartCoroutine("MonitorCondition");
+			}
+		}
+	}
+
+	public void OnDisable()
+	{
+		// make sure to stop monitoring conditio
+		StopCoroutine("MonitorCondition");
+		// remove the coroutine from the list.
+		this.activeCoroutines.Remove("MonitorCondition");
+	}
+
+	// monitor life and death based on the CharacterStats
+	IEnumerator MonitorCondition()
+	{
+		// don't bother monitoring if the CharacterStats component is not set
+		if (!stats)
+		{
+			Debug.Log("The CharacterStats component for this player has not been set yet.");
+			yield break;
+		}
+		// Add this coroutine to the list of active Coroutines
+		this.activeCoroutines.Add("MonitorCondition");
+		// we will assume any conditions have yet been applied when this coroutine started.
+		ConditionType appliedCondition = stats.Condition;
+		// Start looping until the coroutine is manually stopped.
+		while (true)
+		{
+			// check if they were not yet dead, but they need to be.
+			if (stats.isDead() && appliedCondition != ConditionType.DEAD)
+			{
+				// start by making sure the character is dead according to the CharacterStats
+				if (stats && !stats.isDead())
+				{
+					stats.kill();
+				}
+				// disable all functionality
+				statCanMove = false;
+				statCanFire = false;
+				//change layer so bullets can pass through
+				gameObject.layer = 0;
+				// set the new applied condition
+				appliedCondition = stats.Condition;
+				//Throw Animator trigger
+				enemyAnimator.SetTrigger("has_died");
+				// wait a few seconds before being able to live or die again
+				StartCoroutine(DeadBodyTimer(deadBodyLastTime));
+
+				yield return new WaitForSeconds(2f);
+				// if they aren't dead and they previously were, well... bring um back.
+			}
+			else if (stats.isAlive() && appliedCondition == ConditionType.DEAD)
+			{
+				// start by making sure the character is alive according to the CharacterStats
+				if (stats && !stats.isAlive())
+				{
+					stats.revive();
+				}
+				// enable all functionality
+				statCanMove = true;
+				statCanFire = true;
+				// set the new applied condition
+				appliedCondition = stats.Condition;
+				// wait a few seconds before being able to revive again
+				yield return new WaitForSeconds(2f);
+			}
+			// Make player speed reflect the speed stat
+			if (this.moveSpeed != stats.SPD)
+			{
+				this.moveSpeed = stats.SPD;
+			}
+			// only poll on a set interval, for now every tenth of a second
+			yield return new WaitForSeconds(0.1f);
+		}
+		// NOTE: whenever this coroutine is stopped, we should remove it from the coroutine list like below:
+		// this.activeCoroutines.Remove("MonitorCondition");
+	}
+
+	// passes kill to the CharacterStats component
+	public void kill()
+	{
+		if (this.stats)
+		{
+			this.stats.kill();
+		}
+	}
+
+	// passes revive to the CharacterStats component
+	public void revive()
+	{
+		if (this.stats)
+		{
+			this.stats.revive();
+		}
+	}
 
 	void TryToFire()
 	{
@@ -223,6 +342,16 @@ public class Enemy : MonoBehaviour
         }
     }
 
+	private IEnumerator DeadBodyTimer(float duration)
+	{
+		if (!DeadBodyTimerStarted)
+		{
+			DeadBodyTimerStarted = true;
+			yield return new WaitForSeconds(duration);
+			Destroy (gameObject);
+		}
+	}
+
     public void SetDirectionalInput(Vector2 input)
     {
         directionalInput = input;
@@ -258,7 +387,11 @@ public class Enemy : MonoBehaviour
     void CalculateVelocity()
     {
         float targetVelocityX = directionalInput.x * moveSpeed;
-        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisions.below) ? accelerationTimeGrounded : accelerationTimeAirborne);
+		if (statCanMove) {
+			velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisions.below) ? accelerationTimeGrounded : accelerationTimeAirborne);
+		} else {
+			velocity.x = 0;
+		}      
         velocity.y += gravity * Time.deltaTime;
     }
 }

@@ -27,6 +27,9 @@ public class ProjectileController : MonoBehaviour
     public GameObject incomingWarningObject;
     GameObject childWarningObject = null;
 
+	const byte HIT_OBJECT = 0;
+	const byte HIT_CHARACTER = 1;
+
     // Use this for initialization
     void Start()
     {
@@ -74,38 +77,14 @@ public class ProjectileController : MonoBehaviour
 
                 if (eHit)
                 {
-                    if (isEnemyBullet)
-                    {
-                        //2D enemies shouldn't need isEnemyBullet flag in the future when all entities have stats
-                        //Just call the below function for all character hits
-                        this.hit(eHit);
-                    }
-                    else
-                    {
-                        AudioSource enemyAudio = eHit.transform.GetComponent<AudioSource>();
-                        if (enemyAudio)
-                        {
-                            Enemy eScript = eHit.transform.GetComponent<Enemy>();
-                            AudioClip pickedSound = eScript.deathSounds[Random.Range(0, eScript.deathSounds.Length)];
-                            enemyAudio.panStereo = inView.x;
-                            enemyAudio.PlayOneShot(pickedSound, 0.4f);
-                            rend.enabled = false;
-                            eScript.isDying = true;
-                            Destroy(eHit.transform.gameObject, pickedSound.length);
-                        }
-                        else
-                        {
-                            Destroy(eHit.transform.gameObject);
-                        }
-                        DestroyThisBullet();
-                    }
+                    this.hit(eHit, HIT_CHARACTER);
                 }
 
                 RaycastHit2D wHit = Physics2D.Raycast(gameObject.transform.position, travelDirection, Time.deltaTime * bulletSpeed, collisionMask);
 
                 if (wHit)
                 {
-                    this.hit(wHit);
+                    this.hit(wHit, HIT_OBJECT);
                 }
 
             }
@@ -170,23 +149,38 @@ public class ProjectileController : MonoBehaviour
     }
 
     // apply hit effects via a RaycastHit2D
-    void hit(RaycastHit2D rayHit)
+    void hit(RaycastHit2D rayHit, byte HitObjectType)
     {
-        Vector3 inView = Camera.main.WorldToViewportPoint(gameObject.transform.position);
-        // make a hit sound
-        AudioClip pickedSound = ricSounds[Random.Range(0, ricSounds.Length)];
-        objectAudio.panStereo = inView.x;
-        objectAudio.PlayOneShot(pickedSound, 0.2f);
-        rend.enabled = false;
-        // check if the thing we hit has stats
-        CharacterStats stats;
-        if (stats = rayHit.collider.gameObject.GetComponent<CharacterStats>())
-        {
-            // if so we apply damage to the object
-            stats.damage(this.damageAmount);
-        }
-        // remove this game objext
-        DestroyThisBullet(pickedSound.length);
+		Vector3 inView = Camera.main.WorldToViewportPoint(gameObject.transform.position);
+		if (HitObjectType == HIT_OBJECT) {
+			// make a hit sound
+			AudioClip pickedSound = ricSounds[Random.Range(0, ricSounds.Length)];
+			objectAudio.panStereo = inView.x;
+			objectAudio.PlayOneShot(pickedSound, 0.2f);
+			rend.enabled = false;
+			// remove this game objext
+			DestroyThisBullet(pickedSound.length);
+		} 
+		else if (HitObjectType == HIT_CHARACTER) {
+			// check if the thing we hit has stats
+			CharacterStats stats;
+			if (stats = rayHit.collider.gameObject.GetComponent<CharacterStats>())
+			{
+				// if so we apply damage to the object
+				stats.damage(this.damageAmount);
+			}
+			Enemy eScript = rayHit.transform.GetComponent<Enemy>();
+			if (eScript)
+			{
+				AudioSource enemyAudio = rayHit.transform.GetComponent<AudioSource>();
+				AudioClip pickedSound = eScript.deathSounds[Random.Range(0, eScript.deathSounds.Length)];
+				enemyAudio.panStereo = inView.x;
+				enemyAudio.PlayOneShot(pickedSound, 0.4f);
+				rend.enabled = false;
+				//Destroy(eHit.transform.gameObject, pickedSound.length);
+			}
+			DestroyThisBullet();
+		}      
     }
 
     //For when a background enemy bullet passes a collision check w/ player
