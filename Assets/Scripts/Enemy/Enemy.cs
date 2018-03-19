@@ -2,58 +2,18 @@
 using System.Collections;
 using System.Collections.Generic;
 
-[RequireComponent(typeof(EnemyController2D))]
+[RequireComponent(typeof(CharacterStats))]
 public class Enemy : MonoBehaviour
 {
-
-    public float maxJumpHeight = 4;
-    public float minJumpHeight = 1;
-    public float timeToJumpApex = .4f;
-    public GameObject targetToChase;
-    public float accelerationTimeAirborne = .2f;
-    public float accelerationTimeGrounded = .1f;
-    private float moveSpeed = 6;
-    public float shootDelay = 5;
-    public GameObject projectileType;
-    public GameObject enemyNearBulletParentContainer;
-    public Camera mainCam;
-    public float damageOnTouch;
 	public float deadBodyLastTime;
-
-    bool readyToFire;
-    bool fireTimerStarted;
 	bool DeadBodyTimerStarted;
-    //float timeToWallUnstick;
-
-    AudioSource objectAudio;
-    public AudioClip shotSound;
 
     public AudioClip[] deathSounds;
-
-    float gravity;
-    float maxJumpVelocity;
-    float minJumpVelocity;
-    Vector3 velocity;
-    float velocityXSmoothing;
-
-    EnemyController2D controller;
-
-    BoxCollider2D thisCollider;
-    BoxCollider2D playerCollider;
-
-    Vector2 directionalInput;
-    //bool wallSliding;
-    //int wallDirX;
-
-    [HideInInspector]
-    public bool isDying = false;
 
     Renderer rend;
 
 	[HideInInspector]
 	public Animator enemyAnimator;
-	[HideInInspector]
-	public SpriteRenderer enemySpriteRender;
 
 	CharacterStats stats;
 	[HideInInspector]
@@ -66,110 +26,21 @@ public class Enemy : MonoBehaviour
 
     void Start()
     {
-        controller = GetComponent<EnemyController2D>();
-        velocity.x = 0;
-        velocity.y = 0;
-
-        gravity = -(2 * maxJumpHeight) / Mathf.Pow(timeToJumpApex, 2);
-        maxJumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
-        minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(gravity) * minJumpHeight);
-
         rend = GetComponent<Renderer>();
 
-        readyToFire = false;
-        fireTimerStarted = false;
 		DeadBodyTimerStarted = false;
-        objectAudio = GetComponent<AudioSource>();
-
-        thisCollider = GetComponent<BoxCollider2D>();
-        playerCollider = targetToChase.GetComponent<BoxCollider2D>();
 
 		enemyAnimator = GetComponent<Animator>();
-		enemySpriteRender = GetComponent<SpriteRenderer>();
 
 		stats = GetComponent<CharacterStats>();
 
-		// start checking the player stats so we can have the player reflect the condition
+		// constantly check stats
 		StartCoroutine("MonitorCondition");
     }
 
     void Update()
     {
-        Vector3 inView = Camera.main.WorldToViewportPoint(gameObject.transform.position);
-		if (inView.x > -0.15f && inView.x < 1.15f && inView.y > -0.15f && inView.y < 1.15f)
-        {
-            rend.enabled = true;
-            CalculateVelocity();
-			if (!stats.isDead()){
-				Vector2 TowardsPlayer = new Vector2(0, 0);
 
-				if (targetToChase.transform.position.x < gameObject.transform.position.x)
-				{
-					if (Vector3.Distance(targetToChase.transform.position, gameObject.transform.position) >= 6f)
-					{
-						TowardsPlayer.x = -1f;
-					}
-					else if (Vector3.Distance(targetToChase.transform.position, gameObject.transform.position) <= 4f)
-					{
-						TowardsPlayer.x = 1f;
-						//Check if player is touching
-						if (thisCollider.bounds.Intersects(playerCollider.bounds))
-						{
-							CharacterStats stats;
-							if (stats = targetToChase.GetComponent<CharacterStats>())
-							{
-								//Needs invuln state
-								stats.damage(damageOnTouch);
-							}
-						}
-					}
-				}
-				else if (targetToChase.transform.position.x >= gameObject.transform.position.x)
-				{
-					if (Vector3.Distance(targetToChase.transform.position, gameObject.transform.position) >= 6f)
-					{
-						TowardsPlayer.x = 1f;
-					}
-					else if (Vector3.Distance(targetToChase.transform.position, gameObject.transform.position) <= 4f)
-					{
-						TowardsPlayer.x = -1f;
-						//Check if player is touching
-						if (thisCollider.bounds.Intersects(playerCollider.bounds))
-						{
-							CharacterStats stats;
-							if (stats = targetToChase.GetComponent<CharacterStats>())
-							{
-								//Needs invuln state
-								stats.damage(damageOnTouch);
-							}
-						}
-					}
-				}
-
-				SetDirectionalInput(TowardsPlayer);
-				TryToFire ();
-			}
-				
-            controller.Move(velocity * Time.deltaTime, directionalInput);
-
-            if (controller.collisions.above || controller.collisions.below)
-            {
-                if (controller.collisions.slidingDownMaxSlope)
-                {
-                    velocity.y += controller.collisions.slopeNormal.y * -gravity * Time.deltaTime;
-                }
-                else
-                {
-                    velocity.y = 0;
-                }
-            }
-
-			SetAnimatorParameters();
-        }
-        else
-        {
-            rend.enabled = false;
-        }
     }
 
 	public void OnEnable()
@@ -247,11 +118,6 @@ public class Enemy : MonoBehaviour
 				// wait a few seconds before being able to revive again
 				yield return new WaitForSeconds(2f);
 			}
-			// Make player speed reflect the speed stat
-			if (this.moveSpeed != stats.SPD)
-			{
-				this.moveSpeed = stats.SPD;
-			}
 			// only poll on a set interval, for now every tenth of a second
 			yield return new WaitForSeconds(0.1f);
 		}
@@ -277,71 +143,6 @@ public class Enemy : MonoBehaviour
 		}
 	}
 
-	void TryToFire()
-	{
-		if (!fireTimerStarted && !readyToFire)
-		{
-			StartCoroutine(FireTimer(shootDelay));
-		}
-		else if (readyToFire)
-		{
-			//Fire Projectile at player
-			var fireDirection = controller.collisions.faceDir;
-
-			Vector3 bulletSpawnPoint = new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5);
-			Vector3 shotTarget = targetToChase.transform.position;
-
-			Vector3 travelDirection;
-			travelDirection.x = shotTarget.x - bulletSpawnPoint.x;
-			travelDirection.y = shotTarget.y - bulletSpawnPoint.y;
-			//z direction needs to be altered to hit background targets, 0 for foreground targets
-			travelDirection.z = bulletSpawnPoint.z;
-			travelDirection.Normalize();
-
-			//50 is bullet speed * 5 here, pull from enemy shot type in the future
-			RaycastHit2D wHit = Physics2D.Raycast(gameObject.transform.position, travelDirection, Time.deltaTime * 50, controller.collisionMask);
-			if (!wHit)
-			{
-				GameObject thisProjectile = Instantiate(projectileType, bulletSpawnPoint, Quaternion.identity);
-				thisProjectile.transform.parent = enemyNearBulletParentContainer.transform;
-
-				ProjectileController projectileScript = thisProjectile.GetComponent<ProjectileController>();
-
-				projectileScript.targetCoords = shotTarget;
-
-				objectAudio.PlayOneShot(shotSound, 0.3f);
-
-				readyToFire = false;
-				StartCoroutine(FireTimer(shootDelay));
-			}
-			else
-			{
-				//Try to shoot again with a miniscule timer
-				readyToFire = false;
-				StartCoroutine(FireTimer(0.5f));
-			}
-		}
-	}
-
-	private void SetAnimatorParameters()
-	{
-		enemyAnimator.SetFloat("x_velocity", Mathf.Abs(velocity.x));
-		enemyAnimator.SetFloat("y_velocity", velocity.y);
-		enemyAnimator.SetBool("on_ground", controller.collisions.below);
-		enemySpriteRender.flipX = (controller.collisions.faceDir != 1) ? true : false;
-	}
-
-    private IEnumerator FireTimer(float duration)
-    {
-        if (!fireTimerStarted)
-        {
-            fireTimerStarted = true;
-            yield return new WaitForSeconds(duration);
-            fireTimerStarted = false;
-            readyToFire = true;
-        }
-    }
-
 	private IEnumerator DeadBodyTimer(float duration)
 	{
 		if (!DeadBodyTimerStarted)
@@ -351,47 +152,4 @@ public class Enemy : MonoBehaviour
 			Destroy (gameObject);
 		}
 	}
-
-    public void SetDirectionalInput(Vector2 input)
-    {
-        directionalInput = input;
-    }
-
-    public void OnJumpInputDown()
-    {
-        if (controller.collisions.below)
-        {
-            if (controller.collisions.slidingDownMaxSlope)
-            {
-                if (directionalInput.x != -Mathf.Sign(controller.collisions.slopeNormal.x))
-                { // not jumping against max slope
-                    velocity.y = maxJumpVelocity * controller.collisions.slopeNormal.y;
-                    velocity.x = maxJumpVelocity * controller.collisions.slopeNormal.x;
-                }
-            }
-            else
-            {
-                velocity.y = maxJumpVelocity;
-            }
-        }
-    }
-
-    public void OnJumpInputUp()
-    {
-        if (velocity.y > minJumpVelocity)
-        {
-            velocity.y = minJumpVelocity;
-        }
-    }
-
-    void CalculateVelocity()
-    {
-        float targetVelocityX = directionalInput.x * moveSpeed;
-		if (statCanMove) {
-			velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisions.below) ? accelerationTimeGrounded : accelerationTimeAirborne);
-		} else {
-			velocity.x = 0;
-		}      
-        velocity.y += gravity * Time.deltaTime;
-    }
 }
