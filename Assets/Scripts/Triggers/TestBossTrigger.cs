@@ -3,13 +3,13 @@ using System.Collections;
 
 public class TestBossTrigger : MonoBehaviour
 {
-	public GameObject PlayerObject;
+	public BoxCollider2D PlayerCollider;
 	public GameObject CameraLockObject;
 	public GameObject BossWallL;
 	public GameObject BossWallR;
+	public CameraFollow_v2 CameraScript;
 
 	BoxCollider2D ThisCollider;
-	BoxCollider2D PlayerCollider;
 
 	//When player hits trigger :
 	//Enable L and R walls
@@ -21,7 +21,6 @@ public class TestBossTrigger : MonoBehaviour
 	void Start ()
 	{
 		ThisCollider = GetComponent<BoxCollider2D>();
-		PlayerCollider = PlayerObject.GetComponent<BoxCollider2D>();
 	}
 	
 	// Update is called once per frame
@@ -35,6 +34,8 @@ public class TestBossTrigger : MonoBehaviour
 				//Trigger Hit
 				BossWallL.SetActive(true);
 				BossWallR.SetActive(true);
+				CameraScript.cameraLockPosition = CameraLockObject.transform.position;
+				CameraScript.isCameraLocked = true;
 				Destroy(gameObject);
 			}
 		}

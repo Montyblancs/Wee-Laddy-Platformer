@@ -18,10 +18,6 @@ public class PlaceholderEnemyAI : MonoBehaviour
 	public GameObject projectileType;
 	public GameObject enemyNearBulletParentContainer;
 	public AudioClip shotSound;
-	[HideInInspector]
-	public bool statCanMove = true;
-	[HideInInspector]
-	public bool statCanFire = true;
 
 	//Private vars
 	Vector2 directionalInput;
@@ -42,6 +38,7 @@ public class PlaceholderEnemyAI : MonoBehaviour
 	Animator enemyAnimator;
 	SpriteRenderer enemySpriteRender;
 	AudioSource objectAudio;
+	Enemy enemyScript;
 
 	void Start()
 	{
@@ -53,6 +50,7 @@ public class PlaceholderEnemyAI : MonoBehaviour
 		enemyAnimator = GetComponent<Animator>();
 		enemySpriteRender = GetComponent<SpriteRenderer>();
 		objectAudio = GetComponent<AudioSource>();
+		enemyScript = GetComponent<Enemy> ();
 
 		gravity = -(2 * maxJumpHeight) / Mathf.Pow(timeToJumpApex, 2);
 		maxJumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
@@ -114,6 +112,10 @@ public class PlaceholderEnemyAI : MonoBehaviour
 				TryToFire ();
 			}
 
+			if (!enemyScript.statCanMove) {
+				velocity.x = 0;
+			}
+
 			controller.Move(velocity * Time.deltaTime, directionalInput);
 
 			if (controller.collisions.above || controller.collisions.below)
@@ -139,11 +141,7 @@ public class PlaceholderEnemyAI : MonoBehaviour
 	void CalculateVelocity()
 	{
 		float targetVelocityX = directionalInput.x * stats.SPD;
-		if (statCanMove) {
-			velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisions.below) ? accelerationTimeGrounded : accelerationTimeAirborne);
-		} else {
-			velocity.x = 0;
-		}      
+		velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisions.below) ? accelerationTimeGrounded : accelerationTimeAirborne);    
 		velocity.y += gravity * Time.deltaTime;
 	}
 

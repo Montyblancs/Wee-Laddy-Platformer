@@ -24,6 +24,10 @@ public class CameraFollow_v2 : MonoBehaviour
     [Range(0, 1)]
     public float BackgroundSpeed;
 
+	//For methods that take over camera control
+	public bool isCameraLocked = false;
+	public Vector3 cameraLockPosition;
+
     FocusArea focusArea;
 
     void Awake()
@@ -43,21 +47,29 @@ public class CameraFollow_v2 : MonoBehaviour
         focusArea.Update(thisCollider.bounds);
 
         // focus point in the focus area is on the same z plane as the target, so we can calculate distances properly.
-        Vector3 cameraFocusPoint = (focusArea.focusPoint + Vector3.up * verticalOffset);
+		Vector3 cameraFocusPoint = new Vector3(0,0,0);
+		if (!isCameraLocked) {
+			cameraFocusPoint = (focusArea.focusPoint + Vector3.up * verticalOffset);
+		} else {
+			cameraFocusPoint = cameraLockPosition;
+			cameraFocusPoint.z = 0;
+		}
+
         Vector3 positionToFocus = cameraFocusPoint - transform.position;
         float snapDistance = 0.2f;
 
-        // smoothly travel toward target position if we are not already there.
-        if (positionToFocus.magnitude > snapDistance)
-        {
-            // Set the Camera to 10 units away from 0 in the z axis, which should be the background layer
-            transform.position = Vector3.Lerp(transform.position, new Vector3(cameraFocusPoint.x, cameraFocusPoint.y, 0f), 0.4f);
-        }
-        else
-        {
-            transform.position = new Vector3(cameraFocusPoint.x, cameraFocusPoint.y, 0f);
-        }
-
+		if (!isCameraLocked) {
+			// smoothly travel toward target position if we are not already there.
+			if (positionToFocus.magnitude > snapDistance) {
+				// Set the Camera to 10 units away from 0 in the z axis, which should be the background layer
+				transform.position = Vector3.Lerp (transform.position, new Vector3 (cameraFocusPoint.x, cameraFocusPoint.y, 0f), 0.4f);
+			} else {
+				transform.position = new Vector3 (cameraFocusPoint.x, cameraFocusPoint.y, 0f);
+			}
+		} else {
+			transform.position = Vector3.Lerp (transform.position, cameraFocusPoint, Time.deltaTime * 1f);
+		}
+        
         //Parallax Scrolling
         cameraFocusPoint = new Vector3(transform.position.x * BackgroundSpeed, transform.position.y * BackgroundSpeed, 0.0f);
         BGParentObject.transform.position = cameraFocusPoint;
