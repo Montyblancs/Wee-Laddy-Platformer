@@ -297,6 +297,7 @@
     <Compile Include="Assets\Scripts\Camera\CameraFollow.cs" />
     <Compile Include="Assets\Scripts\Camera\CameraFollow_v2.cs" />
     <Compile Include="Assets\Scripts\CharacterStats.cs" />
+    <Compile Include="Assets\Scripts\Enemy\AI Scripts\PlaceholderEnemyAI.cs" />
     <Compile Include="Assets\Scripts\Enemy\Enemy.cs" />
     <Compile Include="Assets\Scripts\Enemy\EnemyController2D.cs" />
     <Compile Include="Assets\Scripts\Enemy\EnemyController3D.cs" />
@@ -309,6 +310,7 @@
     <Compile Include="Assets\Scripts\Player\PlayerInput.cs" />
     <Compile Include="Assets\Scripts\RaycastController.cs" />
     <Compile Include="Assets\Scripts\RaycastController3D.cs" />
+    <Compile Include="Assets\Scripts\Triggers\TestBossTrigger.cs" />
     <Compile Include="Assets\Scripts\Weapons\CasingController.cs" />
     <Compile Include="Assets\Scripts\Weapons\PickupController.cs" />
     <Compile Include="Assets\Scripts\Weapons\ProjectileController.cs" />
