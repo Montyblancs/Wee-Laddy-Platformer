@@ -151,6 +151,12 @@ public class Player : MonoBehaviour
         canDodge = true;
         specialRoundsLeft = -1;
         specialFireRate = -1;
+
+		//FOR FUTURE REFERENCE IN SCREEN SIZING :
+		//Call this line before a resolution change
+		//float proportion = Camera.main.orthographicSize / Mathf.Min(Screen.width, Screen.height);
+		//After change, call this line to maintain the same screen area
+		//Camera.main.orthographicSize = proportion * Mathf.Min(Screen.width, Screen.height);
     }
 
     void Update()
