@@ -67,7 +67,7 @@ public class CameraFollow_v2 : MonoBehaviour
 				transform.position = new Vector3 (cameraFocusPoint.x, cameraFocusPoint.y, 0f);
 			}
 		} else {
-			transform.position = Vector3.Lerp (transform.position, cameraFocusPoint, Time.deltaTime * 1f);
+			transform.position = Vector3.Lerp (transform.position, cameraFocusPoint, Time.deltaTime * 2f);
 		}
         
         //Parallax Scrolling
