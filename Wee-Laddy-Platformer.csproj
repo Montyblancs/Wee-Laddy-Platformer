@@ -304,6 +304,7 @@
     <Compile Include="Assets\Scripts\Enemy\FarEnemy.cs" />
     <Compile Include="Assets\Scripts\ExposePropertyAttribute.cs" />
     <Compile Include="Assets\Scripts\HideObjectNotInView.cs" />
+    <Compile Include="Assets\Scripts\Music\Stage1Music.cs" />
     <Compile Include="Assets\Scripts\PlatformController.cs" />
     <Compile Include="Assets\Scripts\Player\Controller2D.cs" />
     <Compile Include="Assets\Scripts\Player\Player.cs" />

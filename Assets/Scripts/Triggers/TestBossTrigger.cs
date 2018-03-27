@@ -8,6 +8,7 @@ public class TestBossTrigger : MonoBehaviour
 	public GameObject BossWallL;
 	public GameObject BossWallR;
 	public CameraFollow_v2 CameraScript;
+    public Stage1Music MusicScript;
 
 	BoxCollider2D ThisCollider;
 
@@ -36,6 +37,7 @@ public class TestBossTrigger : MonoBehaviour
 				BossWallR.SetActive(true);
 				CameraScript.cameraLockPosition = CameraLockObject.transform.position;
 				CameraScript.isCameraLocked = true;
+                MusicScript.PlayBossTrack();
 				Destroy(gameObject);
 			}
 		}
