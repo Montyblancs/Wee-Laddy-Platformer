@@ -9,7 +9,7 @@ public class TestBossTrigger : MonoBehaviour
 	public GameObject BossWallR;
 	public CameraFollow_v2 CameraScript;
     public Stage1Music MusicScript;
-	public Camera lockAreaCamera;
+	//public Camera lockAreaCamera;
 
 	BoxCollider2D ThisCollider;
 
@@ -34,18 +34,18 @@ public class TestBossTrigger : MonoBehaviour
 			if(ThisCollider.bounds.Intersects(PlayerCollider.bounds))
 			{
 				//Trigger Hit
-				lockAreaCamera.enabled = true;
+				//lockAreaCamera.enabled = true;
 				CameraScript.cameraLockPosition = CameraLockObject.transform.position;
-				Vector3 stageDimensions = lockAreaCamera.ScreenToWorldPoint(CameraLockObject.transform.position);
-				float height = 2f * lockAreaCamera.orthographicSize;
-				float width = height * lockAreaCamera.aspect;
-				BossWallL.SetActive(true);
-				BossWallL.transform.position = new Vector3 (stageDimensions.x - 2f, BossWallL.transform.position.y, BossWallL.transform.position.z);
-				BossWallR.SetActive(true);
-				BossWallR.transform.position = new Vector3 (stageDimensions.x + width - 2f, BossWallL.transform.position.y, BossWallL.transform.position.z);
+				//Vector3 stageDimensions = lockAreaCamera.ScreenToWorldPoint(CameraLockObject.transform.position);
+				//float height = 2f * lockAreaCamera.orthographicSize;
+				//float width = height * lockAreaCamera.aspect;
+				//BossWallL.SetActive(true);
+				//BossWallL.transform.position = new Vector3 (stageDimensions.x - 2f, BossWallL.transform.position.y, BossWallL.transform.position.z);
+				//BossWallR.SetActive(true);
+				//BossWallR.transform.position = new Vector3 (stageDimensions.x + width - 2f, BossWallL.transform.position.y, BossWallL.transform.position.z);
 				CameraScript.isCameraLocked = true;
                 MusicScript.PlayBossTrack();
-				lockAreaCamera.enabled = false;
+				//lockAreaCamera.enabled = false;
 				Destroy(gameObject);
 			}
 		}

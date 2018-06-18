@@ -17,12 +17,17 @@ public class Stage1Music : MonoBehaviour
     {
         thisSource = GetComponent<AudioSource>();
         //Get length of intro and loop using the debug option below
-        //Debug.Log(thisSource.clip.samples);
+        Debug.Log(thisSource.clip.samples);
         // Intro duration = 305280
         // loopDuration - The length of just the looping section of music
-        // loopDuration = 1816704
+        // loopDuration = 1812672
         // loopEnd - The length of the entire song + intro. This is where the music should stop and loop.
-        // loopEnd = 2121984
+        // loopEnd = 2117952
+
+        //Boss Music Values
+        //Intro duration = 470272
+        //loopDuration = 1881088
+        //loopEnd = 2351360
     }
 
     //Set to check every 3ms (Edit -> Project Settings -> Time -> Fixed Timestep)
@@ -67,7 +72,8 @@ public class Stage1Music : MonoBehaviour
         thisSource.volume = startVolume;
         thisSource.clip = nextClip;
         //thisSource.timeSamples to get current time
-        thisSource.timeSamples = 3;
+        loopDuration = 1881088;
+        loopEnd = 2351360;
         thisSource.Play();
     }
 }
