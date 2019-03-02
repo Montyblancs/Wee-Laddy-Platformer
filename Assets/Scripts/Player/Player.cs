@@ -20,11 +20,15 @@ public class Player : MonoBehaviour
     public float MoveSpeed
     {
         get { return (stats ? stats.SPD : moveSpeed); }
-        set {
+        set
+        {
             // if characterstats is fetched, set the stat.
-            if (stats) {
+            if (stats)
+            {
                 stats.SPD = value;
-            } else {
+            }
+            else
+            {
                 this.moveSpeed = value;
             }
         }
@@ -40,8 +44,6 @@ public class Player : MonoBehaviour
     public sbyte dodgeLayer;
     public sbyte playerLayer;
     public float dodgeCooldown = 3f;
-    public Material dodgeMaterial;
-    public Material baseMaterial;
     public float dodgeDuration = 0.2f;
 
     public GameObject farBulletParentContainer;
@@ -87,7 +89,9 @@ public class Player : MonoBehaviour
     static byte DIR_FAR = 1;
 
     // variables to determine what the player is currently able to do
+    [HideInInspector]
     public bool statCanMove = true;
+    [HideInInspector]
     public bool statCanFire = true;
 
     // holds a list of all active coroutines started by this object
@@ -95,13 +99,18 @@ public class Player : MonoBehaviour
 
     // -- variables for UI HUD elements --
     // an image in the UI to reflect show what weapon the player has
-    [SerializeField] 
+    [SerializeField]
     public Image weaponImage;
     // a sprite for when the player has no weapon pickup active, fetch on awake from weaponImage
     private Sprite defaultWeaponImage;
     // an image in the UI to reflect show what weapon the player has
-    [SerializeField] 
+    [SerializeField]
     public Text ammoDisplay;
+
+    [HideInInspector]
+    public Animator playerAnimator;
+    [HideInInspector]
+    public SpriteRenderer playerSpriteRender;
 
     void Start()
     {
@@ -109,9 +118,12 @@ public class Player : MonoBehaviour
         controller = GetComponent<Controller2D>();
         stats = GetComponent<CharacterStats>();
         render = GetComponent<Renderer>();
+        playerAnimator = GetComponent<Animator>();
+        playerSpriteRender = GetComponent<SpriteRenderer>();
 
         // see if we can fetch the default weapon sprite from the ui image
-        if (weaponImage) {
+        if (weaponImage)
+        {
             defaultWeaponImage = weaponImage.sprite;
         }
 
@@ -139,6 +151,12 @@ public class Player : MonoBehaviour
         canDodge = true;
         specialRoundsLeft = -1;
         specialFireRate = -1;
+
+		//FOR FUTURE REFERENCE IN SCREEN SIZING :
+		//Call this line before a resolution change
+		//float proportion = Camera.main.orthographicSize / Mathf.Min(Screen.width, Screen.height);
+		//After change, call this line to maintain the same screen area
+		//Camera.main.orthographicSize = proportion * Mathf.Min(Screen.width, Screen.height);
     }
 
     void Update()
@@ -146,6 +164,9 @@ public class Player : MonoBehaviour
         // update movement
         CalculateVelocity();
         HandleWallSliding();
+
+        //Animator
+        SetAnimatorParameters();
 
         controller.Move(velocity * Time.deltaTime, directionalInput);
 
@@ -160,11 +181,14 @@ public class Player : MonoBehaviour
                 velocity.y = 0;
             }
         }
+    }
 
-        //if (dodgeTimer > 0)
-        //    dodgeTimer -= Time.deltaTime;
-        //else if (controller.isDodging && dodgeTimer <= 0)
-        //    ResetDodgeFlag();
+    private void SetAnimatorParameters()
+    {
+        playerAnimator.SetFloat("x_velocity", Mathf.Abs(velocity.x));
+        playerAnimator.SetFloat("y_velocity", velocity.y);
+        playerAnimator.SetBool("on_ground", controller.collisions.below);
+        playerSpriteRender.flipX = (controller.collisions.faceDir != 1) ? true : false;
     }
 
     //Coroutine Timers
@@ -185,11 +209,11 @@ public class Player : MonoBehaviour
         {
             controller.isDodging = true;
             gameObject.layer = dodgeLayer;
-            render.material = dodgeMaterial;
+			playerAnimator.SetTrigger("start_slide");
             yield return new WaitForSeconds(duration);
             controller.isDodging = false;
             gameObject.layer = playerLayer;
-            render.material = baseMaterial;
+			playerAnimator.SetTrigger("end_slide");
         }
     }
 
@@ -249,16 +273,19 @@ public class Player : MonoBehaviour
             {
                 velocity.x = -wallDirX * wallJumpClimb.x;
                 velocity.y = wallJumpClimb.y;
+                playerAnimator.SetTrigger("start_jump");
             }
             else if (directionalInput.x == 0)
             {
                 velocity.x = -wallDirX * wallJumpOff.x;
                 velocity.y = wallJumpOff.y;
+                playerAnimator.SetTrigger("start_jump");
             }
             else
             {
                 velocity.x = -wallDirX * wallLeap.x;
                 velocity.y = wallLeap.y;
+                playerAnimator.SetTrigger("start_jump");
             }
         }
         if (controller.collisions.below)
@@ -269,11 +296,13 @@ public class Player : MonoBehaviour
                 { // not jumping against max slope
                     velocity.y = maxJumpVelocity * controller.collisions.slopeNormal.y;
                     velocity.x = maxJumpVelocity * controller.collisions.slopeNormal.x;
+                    playerAnimator.SetTrigger("start_jump");
                 }
             }
             else
             {
                 velocity.y = maxJumpVelocity;
+                playerAnimator.SetTrigger("start_jump");
             }
         }
     }
@@ -307,14 +336,7 @@ public class Player : MonoBehaviour
                 //Create a projectile that travels towards the current position of the mouse cursor.
                 //gameObject refers to the parent object of this script
                 GameObject thisProjectile = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, gameObject.transform.position.z), Quaternion.identity);
-                if (shotDir == DIR_FAR)
-                {
-                    thisProjectile.transform.parent = farBulletParentContainer.transform;
-                }
-                else
-                {
-                    thisProjectile.transform.parent = nearBulletParentContainer.transform;
-                }
+                thisProjectile.transform.parent = (shotDir == DIR_FAR) ? farBulletParentContainer.transform : nearBulletParentContainer.transform;
                 ProjectileController projectileScript = thisProjectile.GetComponent<ProjectileController>();
                 projectileScript.casingContainer = casingContainer;
                 projectileScript.CreateCasing(new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5));
@@ -322,15 +344,9 @@ public class Player : MonoBehaviour
                 //Mouse position is not equal to position in game world, just the position on the screen.
                 //Need game world equivilent position for this coord.
                 Vector3 shotTarget = Input.mousePosition;
-                if (shotDir == DIR_NEAR)
-                {
-                    shotTarget.z = 5;
-                }
-                else
-                {
-                    //Should we get the z index of an object under the cursor at the time of click for an accurate target?
-                    shotTarget.z = 16;
-                }
+
+                //Should we get the z index of an object under the cursor at the time of click for an accurate target?
+                shotTarget.z = (shotDir == DIR_NEAR) ? 5 : 16;
 
                 projectileScript.targetCoords = playerCam.ScreenToWorldPoint(shotTarget);
             }
@@ -422,9 +438,12 @@ public class Player : MonoBehaviour
             if (specialRoundsLeft != -1)
                 specialRoundsLeft--;
 
-            if (specialRoundsLeft == 0 && this.projectileType != this.defaultProjectileType) {
+            if (specialRoundsLeft == 0 && this.projectileType != this.defaultProjectileType)
+            {
                 ProjectileChange(defaultProjectileType, -1, 0, 0);
-            } else {
+            }
+            else
+            {
                 // update the ui after each shot
                 this.updateWeaponUI();
             }
@@ -448,14 +467,7 @@ public class Player : MonoBehaviour
             //Create a projectile that travels towards the current position of the mouse cursor.
             //gameObject refers to the parent object of this script
             GameObject thisProjectile = Instantiate(projectileType, new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5), Quaternion.identity);
-            if (shotDir == DIR_FAR)
-            {
-                thisProjectile.transform.parent = farBulletParentContainer.transform;
-            }
-            else
-            {
-                thisProjectile.transform.parent = nearBulletParentContainer.transform;
-            }
+            thisProjectile.transform.parent = (shotDir == DIR_FAR) ? farBulletParentContainer.transform : nearBulletParentContainer.transform;
             ProjectileController projectileScript = thisProjectile.GetComponent<ProjectileController>();
             projectileScript.casingContainer = casingContainer;
             projectileScript.CreateCasing(new Vector3(gameObject.transform.position.x + fireDirection - (0.5f * fireDirection), gameObject.transform.position.y, 5));
@@ -463,14 +475,7 @@ public class Player : MonoBehaviour
             //Mouse position is not equal to position in game world, just the position on the screen.
             //Need game world equivilent position for this coord.
             Vector3 shotTarget = Input.mousePosition;
-            if (shotDir == DIR_NEAR)
-            {
-                shotTarget.z = 5;
-            }
-            else
-            {
-                shotTarget.z = 16;
-            }
+            shotTarget.z = (shotDir == DIR_NEAR) ? 5 : 16;
 
             projectileScript.targetCoords = playerCam.ScreenToWorldPoint(shotTarget);
 
@@ -481,9 +486,12 @@ public class Player : MonoBehaviour
             if (specialRoundsLeft != -1)
                 specialRoundsLeft--;
 
-            if (specialRoundsLeft == 0 && this.projectileType != this.defaultProjectileType) {
+            if (specialRoundsLeft == 0 && this.projectileType != this.defaultProjectileType)
+            {
                 ProjectileChange(defaultProjectileType, -1, 0, 0);
-            } else {
+            }
+            else
+            {
                 // update the ui after each shot
                 this.updateWeaponUI();
             }
@@ -525,7 +533,8 @@ public class Player : MonoBehaviour
         thisProjectileController = projectileType.GetComponent<ProjectileController>();
         shotSound = thisProjectileController.shotSound;
         // swap the sprite to the default weapon image if needed
-        if (this.weaponImage && this.projectileType == this.defaultProjectileType && this.weaponImage.sprite != this.defaultWeaponImage) {
+        if (this.weaponImage && this.projectileType == this.defaultProjectileType && this.weaponImage.sprite != this.defaultWeaponImage)
+        {
             // switch ui image to default weapon
             this.weaponImage.sprite = this.defaultWeaponImage;
             this.weaponImage.rectTransform.sizeDelta = new Vector2(defaultWeaponImage.rect.width, defaultWeaponImage.rect.height);
@@ -593,7 +602,8 @@ public class Player : MonoBehaviour
         float transitionTime = (controller.collisions.below) ? accelerationTimeGrounded : accelerationTimeAirborne;
         velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref accelerationX, transitionTime);
         // if its close enough, make it target value, cause for some reason transitionTime doesn't do that.
-        if (Mathf.Abs(accelerationX) < 0.001F) {
+        if (Mathf.Abs(accelerationX) < 0.001F)
+        {
             accelerationX = 0F;
             velocity.x = targetVelocityX;
         }
@@ -629,10 +639,14 @@ public class Player : MonoBehaviour
                 statCanFire = false;
                 // set the new applied condition
                 appliedCondition = stats.Condition;
+				//Throw Animator trigger
+				playerAnimator.SetTrigger("has_died");
                 // wait a few seconds before being able to live or die again
                 yield return new WaitForSeconds(2f);
-            // if they aren't dead and they previously were, well... bring um back.
-            } else if (stats.isAlive() && appliedCondition == ConditionType.DEAD) {
+                // if they aren't dead and they previously were, well... bring um back.
+            }
+            else if (stats.isAlive() && appliedCondition == ConditionType.DEAD)
+            {
                 // start by making sure the character is alive according to the CharacterStats
                 if (stats && !stats.isAlive())
                 {
@@ -649,7 +663,8 @@ public class Player : MonoBehaviour
                 yield return new WaitForSeconds(2f);
             }
             // Make player speed reflect the speed stat
-            if (this.moveSpeed != stats.SPD) {
+            if (this.moveSpeed != stats.SPD)
+            {
                 this.moveSpeed = stats.SPD;
             }
             // only poll on a set interval, for now every tenth of a second
@@ -678,10 +693,11 @@ public class Player : MonoBehaviour
     }
 
     // make sure the ui reflects the current weapon ammo.
-    public void updateWeaponUI() 
+    public void updateWeaponUI()
     {
         // check if we need to update the ammo indicator.
-        if (this.specialRoundsLeft > 0 && this.ammoDisplay) {
+        if (this.specialRoundsLeft > 0 && this.ammoDisplay)
+        {
             this.ammoDisplay.text = this.specialRoundsLeft.ToString();
         }
     }

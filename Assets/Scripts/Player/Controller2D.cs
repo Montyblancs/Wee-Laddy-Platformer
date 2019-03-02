@@ -10,6 +10,8 @@ public class Controller2D : RaycastController
     public Vector2 playerInput;
     public bool isDodging;
     public float dodgeDuration = .2f;
+
+	public CameraFollow_v2 cameraScript;
     //float moveSpeed = 6;
 
     public override void Start()
@@ -70,6 +72,8 @@ public class Controller2D : RaycastController
             rayLength = 2 * skinWidth;
         }
 
+		bool hasHit = false;
+
         for (int i = 0; i < horizontalRayCount; i++)
         {
             Vector2 rayOrigin = (directionX == -1) ? raycastOrigins.bottomLeft : raycastOrigins.bottomRight;
@@ -80,7 +84,7 @@ public class Controller2D : RaycastController
 
             if (hit)
             {
-
+				hasHit = true;
                 if (hit.distance == 0)
                 {
                     continue;
@@ -120,6 +124,11 @@ public class Controller2D : RaycastController
                 }
             }
         }
+
+		if (cameraScript.isCameraLocked && !hasHit) {
+			//Check for collision with screen bounds
+
+		}
     }
 
     void VerticalCollisions(ref Vector2 moveAmount)

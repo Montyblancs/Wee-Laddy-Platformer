@@ -3,7 +3,6 @@ using UnityEngine.UI;
 
 public class PickupController : MonoBehaviour {
 
-    public GameObject playerObject;
     public GameObject giveBulletType;
     public short numOfShots;
     //Fire Type Codes:
@@ -18,15 +17,13 @@ public class PickupController : MonoBehaviour {
     Renderer rend;
 
     BoxCollider2D thisCollider;
-    BoxCollider2D playerCollider;
-
-    Player playerScript;
+    
+	public BoxCollider2D playerCollider;
+    public Player playerScript;
 
     void Start () {
         rend = GetComponent<Renderer>();
         thisCollider = GetComponent<BoxCollider2D>();
-        playerCollider = playerObject.GetComponent<BoxCollider2D>();
-        playerScript = playerObject.GetComponent<Player>();
     }
 
     // Update is called once per frame
