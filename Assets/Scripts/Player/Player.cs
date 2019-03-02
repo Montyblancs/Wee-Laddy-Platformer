@@ -2,13 +2,13 @@
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 
 // TODO: Make the CharacterStats Component Optional?
 [RequireComponent(typeof(Controller2D))]
 [RequireComponent(typeof(CharacterStats))]
 public class Player : MonoBehaviour
 {
-
     public float maxJumpHeight = 4;
     public float minJumpHeight = 1;
     public float timeToJumpApex = .4f;
@@ -112,6 +112,24 @@ public class Player : MonoBehaviour
     [HideInInspector]
     public SpriteRenderer playerSpriteRender;
 
+    // Debug Fields
+    [HideInInspector]
+    public TextMeshProUGUI FPSDebug;
+    [HideInInspector]
+    public TextMeshProUGUI VelocityDebug;
+    [HideInInspector]
+    public GameObject refFarBulletContainer;
+    [HideInInspector]
+    public GameObject refNearBulletContainer;
+    [HideInInspector]
+    public TextMeshProUGUI BulletDebug;
+    // FPS Debug Calculators
+    int m_frameCounter = 0;
+    float m_timeCounter = 0.0f;
+    float m_lastFramerate = 0.0f;
+    [HideInInspector]
+    public float m_refreshTime = 0.5f;
+
     void Start()
     {
         // get essential components
@@ -152,6 +170,13 @@ public class Player : MonoBehaviour
         specialRoundsLeft = -1;
         specialFireRate = -1;
 
+        //Set debug containers
+        FPSDebug = GameObject.Find("DB-FPS").GetComponent<TextMeshProUGUI>();
+        VelocityDebug = GameObject.Find("DB-Velocity").GetComponent<TextMeshProUGUI>();
+        BulletDebug = GameObject.Find("DB-BulletCount").GetComponent<TextMeshProUGUI>();
+        refNearBulletContainer = GameObject.Find("NearBulletContainer");
+        refFarBulletContainer = GameObject.Find("FarBulletContainer");
+
 		//FOR FUTURE REFERENCE IN SCREEN SIZING :
 		//Call this line before a resolution change
 		//float proportion = Camera.main.orthographicSize / Mathf.Min(Screen.width, Screen.height);
@@ -181,6 +206,23 @@ public class Player : MonoBehaviour
                 velocity.y = 0;
             }
         }
+
+        VelocityDebug.text = velocity.x.ToString("F2") + "X|" + velocity.y.ToString("F2") + "Y|" + velocity.z.ToString("F2") + "Z";
+        BulletDebug.text = (refNearBulletContainer.transform.childCount + refFarBulletContainer.transform.childCount).ToString() + "|NEAR:" + refNearBulletContainer.transform.childCount.ToString() + "|FAR:" + refFarBulletContainer.transform.childCount.ToString();
+
+        //Calculate FPS
+        if (m_timeCounter < m_refreshTime)
+        {
+            m_timeCounter += Time.deltaTime;
+            m_frameCounter++;
+        }
+        else
+        {
+            m_lastFramerate = (float)m_frameCounter / m_timeCounter;
+            m_frameCounter = 0;
+            m_timeCounter = 0.0f;
+        }
+        FPSDebug.text = Mathf.Ceil(m_lastFramerate).ToString();
     }
 
     private void SetAnimatorParameters()

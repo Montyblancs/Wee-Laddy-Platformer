@@ -54,5 +54,12 @@ public class PlayerInput : MonoBehaviour
             //Reload scene for debug purposes
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
+
+        if (Application.isEditor && Input.GetKeyDown(KeyCode.BackQuote))
+        {
+            //Toggle debug panel
+            CanvasGroup cGroup = GameObject.Find("DebugUI").GetComponent<CanvasGroup>();
+            cGroup.alpha = (cGroup.alpha >= 1f) ? 0f : 1f;
+        }
     }
 }
