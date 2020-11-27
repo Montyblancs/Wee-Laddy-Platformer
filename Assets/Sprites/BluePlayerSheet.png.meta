@@ -1,76 +1,204 @@
 fileFormatVersion: 2
 guid: a96bcdc0531a522489a3b53836d966a5
-timeCreated: 1520962358
-licenseType: Free
 TextureImporter:
-  fileIDToRecycleName:
-    21300000: BluePlayerSheet_0
-    21300002: BluePlayerSheet_1
-    21300004: BluePlayerSheet_2
-    21300006: BluePlayerSheet_3
-    21300008: BluePlayerSheet_4
-    21300010: BluePlayerSheet_5
-    21300012: BluePlayerSheet_6
-    21300014: BluePlayerSheet_7
-    21300016: BluePlayerSheet_8
-    21300018: BluePlayerSheet_9
-    21300020: BluePlayerSheet_10
-    21300022: BluePlayerSheet_11
-    21300024: BluePlayerSheet_12
-    21300026: BluePlayerSheet_13
-    21300028: BluePlayerSheet_14
-    21300030: BluePlayerSheet_15
-    21300032: BluePlayerSheet_16
-    21300034: BluePlayerSheet_17
-    21300036: BluePlayerSheet_18
-    21300038: BluePlayerSheet_19
-    21300040: BluePlayerSheet_20
-    21300042: BluePlayerSheet_21
-    21300044: BluePlayerSheet_22
-    21300046: BluePlayerSheet_23
-    21300048: BluePlayerSheet_24
-    21300050: BluePlayerSheet_25
-    21300052: BluePlayerSheet_26
-    21300054: BluePlayerSheet_27
-    21300056: BluePlayerSheet_28
-    21300058: BluePlayerSheet_29
-    21300060: BluePlayerSheet_30
-    21300062: BluePlayerSheet_31
-    21300064: BluePlayerSheet_32
-    21300066: BluePlayerSheet_33
-    21300068: BluePlayerSheet_34
-    21300070: BluePlayerSheet_35
-    21300072: BluePlayerSheet_36
-    21300074: BluePlayerSheet_37
-    21300076: BluePlayerSheet_38
-    21300078: BluePlayerSheet_39
-    21300080: BluePlayerSheet_40
-    21300082: BluePlayerSheet_41
-    21300084: BluePlayerSheet_42
-    21300086: BluePlayerSheet_43
-    21300088: BluePlayerSheet_44
-    21300090: BluePlayerSheet_45
-    21300092: BluePlayerSheet_46
-    21300094: BluePlayerSheet_47
-    21300096: BluePlayerSheet_48
-    21300098: BluePlayerSheet_49
-    21300100: BluePlayerSheet_50
-    21300102: BluePlayerSheet_51
-    21300104: BluePlayerSheet_52
-    21300106: BluePlayerSheet_53
-    21300108: BluePlayerSheet_54
-    21300110: BluePlayerSheet_55
-    21300112: BluePlayerSheet_56
-    21300114: BluePlayerSheet_57
-    21300116: BluePlayerSheet_58
-    21300118: BluePlayerSheet_59
-    21300120: BluePlayerSheet_60
-    21300122: BluePlayerSheet_61
-    21300124: BluePlayerSheet_62
-    21300126: BluePlayerSheet_63
-    21300128: BluePlayerSheet_64
+  internalIDToNameTable:
+  - first:
+      213: 21300000
+    second: BluePlayerSheet_0
+  - first:
+      213: 21300002
+    second: BluePlayerSheet_1
+  - first:
+      213: 21300004
+    second: BluePlayerSheet_2
+  - first:
+      213: 21300006
+    second: BluePlayerSheet_3
+  - first:
+      213: 21300008
+    second: BluePlayerSheet_4
+  - first:
+      213: 21300010
+    second: BluePlayerSheet_5
+  - first:
+      213: 21300012
+    second: BluePlayerSheet_6
+  - first:
+      213: 21300014
+    second: BluePlayerSheet_7
+  - first:
+      213: 21300016
+    second: BluePlayerSheet_8
+  - first:
+      213: 21300018
+    second: BluePlayerSheet_9
+  - first:
+      213: 21300020
+    second: BluePlayerSheet_10
+  - first:
+      213: 21300022
+    second: BluePlayerSheet_11
+  - first:
+      213: 21300024
+    second: BluePlayerSheet_12
+  - first:
+      213: 21300026
+    second: BluePlayerSheet_13
+  - first:
+      213: 21300028
+    second: BluePlayerSheet_14
+  - first:
+      213: 21300030
+    second: BluePlayerSheet_15
+  - first:
+      213: 21300032
+    second: BluePlayerSheet_16
+  - first:
+      213: 21300034
+    second: BluePlayerSheet_17
+  - first:
+      213: 21300036
+    second: BluePlayerSheet_18
+  - first:
+      213: 21300038
+    second: BluePlayerSheet_19
+  - first:
+      213: 21300040
+    second: BluePlayerSheet_20
+  - first:
+      213: 21300042
+    second: BluePlayerSheet_21
+  - first:
+      213: 21300044
+    second: BluePlayerSheet_22
+  - first:
+      213: 21300046
+    second: BluePlayerSheet_23
+  - first:
+      213: 21300048
+    second: BluePlayerSheet_24
+  - first:
+      213: 21300050
+    second: BluePlayerSheet_25
+  - first:
+      213: 21300052
+    second: BluePlayerSheet_26
+  - first:
+      213: 21300054
+    second: BluePlayerSheet_27
+  - first:
+      213: 21300056
+    second: BluePlayerSheet_28
+  - first:
+      213: 21300058
+    second: BluePlayerSheet_29
+  - first:
+      213: 21300060
+    second: BluePlayerSheet_30
+  - first:
+      213: 21300062
+    second: BluePlayerSheet_31
+  - first:
+      213: 21300064
+    second: BluePlayerSheet_32
+  - first:
+      213: 21300066
+    second: BluePlayerSheet_33
+  - first:
+      213: 21300068
+    second: BluePlayerSheet_34
+  - first:
+      213: 21300070
+    second: BluePlayerSheet_35
+  - first:
+      213: 21300072
+    second: BluePlayerSheet_36
+  - first:
+      213: 21300074
+    second: BluePlayerSheet_37
+  - first:
+      213: 21300076
+    second: BluePlayerSheet_38
+  - first:
+      213: 21300078
+    second: BluePlayerSheet_39
+  - first:
+      213: 21300080
+    second: BluePlayerSheet_40
+  - first:
+      213: 21300082
+    second: BluePlayerSheet_41
+  - first:
+      213: 21300084
+    second: BluePlayerSheet_42
+  - first:
+      213: 21300086
+    second: BluePlayerSheet_43
+  - first:
+      213: 21300088
+    second: BluePlayerSheet_44
+  - first:
+      213: 21300090
+    second: BluePlayerSheet_45
+  - first:
+      213: 21300092
+    second: BluePlayerSheet_46
+  - first:
+      213: 21300094
+    second: BluePlayerSheet_47
+  - first:
+      213: 21300096
+    second: BluePlayerSheet_48
+  - first:
+      213: 21300098
+    second: BluePlayerSheet_49
+  - first:
+      213: 21300100
+    second: BluePlayerSheet_50
+  - first:
+      213: 21300102
+    second: BluePlayerSheet_51
+  - first:
+      213: 21300104
+    second: BluePlayerSheet_52
+  - first:
+      213: 21300106
+    second: BluePlayerSheet_53
+  - first:
+      213: 21300108
+    second: BluePlayerSheet_54
+  - first:
+      213: 21300110
+    second: BluePlayerSheet_55
+  - first:
+      213: 21300112
+    second: BluePlayerSheet_56
+  - first:
+      213: 21300114
+    second: BluePlayerSheet_57
+  - first:
+      213: 21300116
+    second: BluePlayerSheet_58
+  - first:
+      213: 21300118
+    second: BluePlayerSheet_59
+  - first:
+      213: 21300120
+    second: BluePlayerSheet_60
+  - first:
+      213: 21300122
+    second: BluePlayerSheet_61
+  - first:
+      213: 21300124
+    second: BluePlayerSheet_62
+  - first:
+      213: 21300126
+    second: BluePlayerSheet_63
+  - first:
+      213: 21300128
+    second: BluePlayerSheet_64
   externalObjects: {}
-  serializedVersion: 4
+  serializedVersion: 11
   mipmaps:
     mipMapMode: 0
     enableMipMap: 0
@@ -88,6 +216,8 @@ TextureImporter:
     heightScale: 0.25
     normalMapFilter: 0
   isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -98,7 +228,7 @@ TextureImporter:
     serializedVersion: 2
     filterMode: -1
     aniso: -1
-    mipBias: -1
+    mipBias: -100
     wrapU: 1
     wrapV: 1
     wrapW: 1
@@ -110,18 +240,22 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
   spriteTessellationDetail: -1
   textureType: 8
   textureShape: 1
+  singleChannelComponent: 0
   maxTextureSizeSet: 0
   compressionQualitySet: 0
   textureFormatSet: 0
+  applyGammaDecoding: 1
   platformSettings:
-  - buildTarget: DefaultTexturePlatform
+  - serializedVersion: 3
+    buildTarget: DefaultTexturePlatform
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -131,7 +265,9 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
-  - buildTarget: Standalone
+    forceMaximumCompressionQuality_BC6H_BC7: 1
+  - serializedVersion: 3
+    buildTarget: Standalone
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -141,7 +277,9 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
-  - buildTarget: WebGL
+    forceMaximumCompressionQuality_BC6H_BC7: 1
+  - serializedVersion: 3
+    buildTarget: WebGL
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -151,6 +289,7 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 1
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -176,6 +315,13 @@ TextureImporter:
         - {x: 7, y: 24}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 02305410000000000800000000000000
+      internalID: 21300000
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_1
       rect:
@@ -197,6 +343,13 @@ TextureImporter:
         - {x: 8, y: 24}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 22305410000000000800000000000000
+      internalID: 21300002
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_2
       rect:
@@ -218,6 +371,13 @@ TextureImporter:
         - {x: 15, y: 24}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 42305410000000000800000000000000
+      internalID: 21300004
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_3
       rect:
@@ -239,6 +399,13 @@ TextureImporter:
         - {x: 10, y: 23}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 62305410000000000800000000000000
+      internalID: 21300006
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_4
       rect:
@@ -262,6 +429,13 @@ TextureImporter:
         - {x: 8, y: 30}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 82305410000000000800000000000000
+      internalID: 21300008
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_5
       rect:
@@ -288,6 +462,13 @@ TextureImporter:
         - {x: 13, y: 27}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: a2305410000000000800000000000000
+      internalID: 21300010
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_6
       rect:
@@ -312,6 +493,13 @@ TextureImporter:
         - {x: 17, y: 27}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: c2305410000000000800000000000000
+      internalID: 21300012
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_7
       rect:
@@ -334,6 +522,13 @@ TextureImporter:
         - {x: 13, y: 29}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: e2305410000000000800000000000000
+      internalID: 21300014
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_8
       rect:
@@ -355,6 +550,13 @@ TextureImporter:
         - {x: 11, y: 30}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 03305410000000000800000000000000
+      internalID: 21300016
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_9
       rect:
@@ -377,6 +579,13 @@ TextureImporter:
         - {x: 9, y: 29}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 23305410000000000800000000000000
+      internalID: 21300018
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_10
       rect:
@@ -397,6 +606,13 @@ TextureImporter:
         - {x: 19, y: 28}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 43305410000000000800000000000000
+      internalID: 21300020
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_11
       rect:
@@ -419,6 +635,13 @@ TextureImporter:
         - {x: 11, y: 29}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 63305410000000000800000000000000
+      internalID: 21300022
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_12
       rect:
@@ -439,6 +662,13 @@ TextureImporter:
         - {x: 19, y: 25}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 83305410000000000800000000000000
+      internalID: 21300024
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_13
       rect:
@@ -458,6 +688,13 @@ TextureImporter:
         - {x: 21, y: 21}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: a3305410000000000800000000000000
+      internalID: 21300026
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_14
       rect:
@@ -479,6 +716,13 @@ TextureImporter:
         - {x: 30, y: 11}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: c3305410000000000800000000000000
+      internalID: 21300028
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_15
       rect:
@@ -507,6 +751,13 @@ TextureImporter:
         - {x: 4, y: -32}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: e3305410000000000800000000000000
+      internalID: 21300030
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_16
       rect:
@@ -531,6 +782,13 @@ TextureImporter:
         - {x: 11, y: 23}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 04305410000000000800000000000000
+      internalID: 21300032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_17
       rect:
@@ -559,6 +817,13 @@ TextureImporter:
         - {x: 19, y: -32}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 24305410000000000800000000000000
+      internalID: 21300034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_18
       rect:
@@ -584,6 +849,13 @@ TextureImporter:
         - {x: 9, y: -7}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 44305410000000000800000000000000
+      internalID: 21300036
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_19
       rect:
@@ -608,6 +880,13 @@ TextureImporter:
         - {x: 8, y: -5}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 64305410000000000800000000000000
+      internalID: 21300038
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_20
       rect:
@@ -632,6 +911,13 @@ TextureImporter:
         - {x: 11, y: 2}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 84305410000000000800000000000000
+      internalID: 21300040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_21
       rect:
@@ -655,6 +941,13 @@ TextureImporter:
         - {x: -4, y: -32}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: a4305410000000000800000000000000
+      internalID: 21300042
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_22
       rect:
@@ -675,6 +968,13 @@ TextureImporter:
         - {x: 19, y: -32}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: c4305410000000000800000000000000
+      internalID: 21300044
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_23
       rect:
@@ -696,6 +996,13 @@ TextureImporter:
         - {x: 13, y: -19}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: e4305410000000000800000000000000
+      internalID: 21300046
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_24
       rect:
@@ -721,6 +1028,13 @@ TextureImporter:
         - {x: 7, y: -32}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 05305410000000000800000000000000
+      internalID: 21300048
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_25
       rect:
@@ -748,6 +1062,13 @@ TextureImporter:
         - {x: 6, y: -32}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 25305410000000000800000000000000
+      internalID: 21300050
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_26
       rect:
@@ -768,6 +1089,13 @@ TextureImporter:
         - {x: 21, y: 29}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 45305410000000000800000000000000
+      internalID: 21300052
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_27
       rect:
@@ -786,6 +1114,13 @@ TextureImporter:
         - {x: 21, y: 28}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 65305410000000000800000000000000
+      internalID: 21300054
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_28
       rect:
@@ -809,6 +1144,13 @@ TextureImporter:
         - {x: 21, y: -9}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 85305410000000000800000000000000
+      internalID: 21300056
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_29
       rect:
@@ -830,6 +1172,13 @@ TextureImporter:
         - {x: 5, y: 28}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: a5305410000000000800000000000000
+      internalID: 21300058
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_30
       rect:
@@ -852,6 +1201,13 @@ TextureImporter:
         - {x: 26, y: 22}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: c5305410000000000800000000000000
+      internalID: 21300060
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_31
       rect:
@@ -876,6 +1232,13 @@ TextureImporter:
         - {x: 18, y: 3}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: e5305410000000000800000000000000
+      internalID: 21300062
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_32
       rect:
@@ -897,6 +1260,13 @@ TextureImporter:
         - {x: -23, y: -19}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 06305410000000000800000000000000
+      internalID: 21300064
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_33
       rect:
@@ -922,6 +1292,13 @@ TextureImporter:
         - {x: 16, y: -32}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 26305410000000000800000000000000
+      internalID: 21300066
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_34
       rect:
@@ -942,6 +1319,13 @@ TextureImporter:
         - {x: -9, y: 30}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 46305410000000000800000000000000
+      internalID: 21300068
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_35
       rect:
@@ -964,6 +1348,13 @@ TextureImporter:
         - {x: 9, y: 30}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 66305410000000000800000000000000
+      internalID: 21300070
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_36
       rect:
@@ -983,6 +1374,13 @@ TextureImporter:
         - {x: 18, y: 29}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 86305410000000000800000000000000
+      internalID: 21300072
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_37
       rect:
@@ -1008,6 +1406,13 @@ TextureImporter:
         - {x: -8, y: 16}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: a6305410000000000800000000000000
+      internalID: 21300074
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_38
       rect:
@@ -1029,6 +1434,13 @@ TextureImporter:
         - {x: 9, y: 30}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: c6305410000000000800000000000000
+      internalID: 21300076
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_39
       rect:
@@ -1052,6 +1464,13 @@ TextureImporter:
         - {x: 10, y: 30}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: e6305410000000000800000000000000
+      internalID: 21300078
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_40
       rect:
@@ -1073,6 +1492,13 @@ TextureImporter:
         - {x: 12, y: 15}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 07305410000000000800000000000000
+      internalID: 21300080
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_41
       rect:
@@ -1093,6 +1519,13 @@ TextureImporter:
         - {x: 23, y: 9}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 27305410000000000800000000000000
+      internalID: 21300082
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_42
       rect:
@@ -1117,6 +1550,13 @@ TextureImporter:
         - {x: 14, y: -32}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 47305410000000000800000000000000
+      internalID: 21300084
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_43
       rect:
@@ -1139,6 +1579,13 @@ TextureImporter:
         - {x: 11, y: 27}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 67305410000000000800000000000000
+      internalID: 21300086
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_44
       rect:
@@ -1160,6 +1607,13 @@ TextureImporter:
         - {x: 14, y: 30}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 87305410000000000800000000000000
+      internalID: 21300088
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_45
       rect:
@@ -1180,6 +1634,13 @@ TextureImporter:
         - {x: 20, y: 32}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: a7305410000000000800000000000000
+      internalID: 21300090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_46
       rect:
@@ -1202,6 +1663,13 @@ TextureImporter:
         - {x: 15, y: 32}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: c7305410000000000800000000000000
+      internalID: 21300092
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_47
       rect:
@@ -1224,6 +1692,13 @@ TextureImporter:
         - {x: 14, y: 32}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: e7305410000000000800000000000000
+      internalID: 21300094
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_48
       rect:
@@ -1249,6 +1724,13 @@ TextureImporter:
         - {x: 18, y: -1}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 08305410000000000800000000000000
+      internalID: 21300096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_49
       rect:
@@ -1271,6 +1753,13 @@ TextureImporter:
         - {x: 18, y: 5}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 28305410000000000800000000000000
+      internalID: 21300098
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_50
       rect:
@@ -1292,6 +1781,13 @@ TextureImporter:
         - {x: 7, y: 28}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 48305410000000000800000000000000
+      internalID: 21300100
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_51
       rect:
@@ -1314,6 +1810,13 @@ TextureImporter:
         - {x: 19, y: 28}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 68305410000000000800000000000000
+      internalID: 21300102
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_52
       rect:
@@ -1337,6 +1840,13 @@ TextureImporter:
         - {x: 20, y: 12}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 88305410000000000800000000000000
+      internalID: 21300104
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_53
       rect:
@@ -1360,6 +1870,13 @@ TextureImporter:
         - {x: 7, y: 28}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: a8305410000000000800000000000000
+      internalID: 21300106
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_54
       rect:
@@ -1382,6 +1899,13 @@ TextureImporter:
         - {x: 9, y: 28}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: c8305410000000000800000000000000
+      internalID: 21300108
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_55
       rect:
@@ -1403,6 +1927,13 @@ TextureImporter:
         - {x: 17, y: 7}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: e8305410000000000800000000000000
+      internalID: 21300110
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_56
       rect:
@@ -1424,6 +1955,13 @@ TextureImporter:
         - {x: 13, y: 29}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 09305410000000000800000000000000
+      internalID: 21300112
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_57
       rect:
@@ -1457,6 +1995,13 @@ TextureImporter:
         - {x: 16, y: -8}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 29305410000000000800000000000000
+      internalID: 21300114
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_58
       rect:
@@ -1480,6 +2025,13 @@ TextureImporter:
         - {x: 13, y: 27}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 49305410000000000800000000000000
+      internalID: 21300116
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_59
       rect:
@@ -1500,6 +2052,13 @@ TextureImporter:
         - {x: 11, y: 30}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 69305410000000000800000000000000
+      internalID: 21300118
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_60
       rect:
@@ -1524,6 +2083,13 @@ TextureImporter:
         - {x: 9, y: 30}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 89305410000000000800000000000000
+      internalID: 21300120
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_61
       rect:
@@ -1547,6 +2113,13 @@ TextureImporter:
         - {x: 12, y: 28}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: a9305410000000000800000000000000
+      internalID: 21300122
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_62
       rect:
@@ -1570,6 +2143,13 @@ TextureImporter:
         - {x: 15, y: 30}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: c9305410000000000800000000000000
+      internalID: 21300124
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_63
       rect:
@@ -1596,6 +2176,13 @@ TextureImporter:
         - {x: -3, y: -23}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: e9305410000000000800000000000000
+      internalID: 21300126
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     - serializedVersion: 2
       name: BluePlayerSheet_64
       rect:
@@ -1616,6 +2203,13 @@ TextureImporter:
         - {x: 8, y: 30}
       physicsShape: []
       tessellationDetail: 0
+      bones: []
+      spriteID: 0a305410000000000800000000000000
+      internalID: 21300128
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline:
     - - {x: -228, y: -226}
       - {x: -232, y: -236}
@@ -2147,7 +2741,17 @@ TextureImporter:
       - {x: 179, y: 267}
       - {x: 169, y: 284}
     physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
   spritePackingTag: 
+  pSDRemoveMatte: 0
+  pSDShowRemoveMatteOption: 0
   userData: 
   assetBundleName: 
   assetBundleVariant: 

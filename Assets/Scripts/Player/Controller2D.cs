@@ -30,7 +30,7 @@ public class Controller2D : RaycastController
     {
         if (isDodging)
         {
-            moveAmount.x = 0.5f * collisions.faceDir;
+            moveAmount.x = 0.6f * collisions.faceDir;
         }
         UpdateRaycastOrigins();
 
